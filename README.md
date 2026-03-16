@@ -215,6 +215,21 @@ Mount a volume on `/data`:
 
 ---
 
+## Disclaimer
+
+This project was built primarily using AI-assisted development (vibe coding with Claude / Anthropic). It was made for personal use on a home network.
+
+**⚠️ Important:**
+
+- **No security audit** has been performed. Do not expose this application to the internet.
+- This is a personal project — provided as-is, with no warranty, no official support, and no commitment to feature requests or bug fixes.
+- You are welcome to use, fork, and adapt it for your own needs, but you do so **at your own risk and responsibility**.
+- There are probably bugs. I do my best, but this is a hobby project, not production software.
+
+If you find it useful, great! Just be aware of what you're running.
+
+---
+
 ## License
 
 MIT

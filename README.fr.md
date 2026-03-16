@@ -211,6 +211,21 @@ Monter un volume sur `/data` :
 
 ---
 
+## Avertissement
+
+Ce projet a été développé principalement par vibe coding assisté par IA (Claude / Anthropic). Il a été conçu pour un usage personnel sur un réseau domestique.
+
+**⚠️ Important :**
+
+- **Aucun audit de sécurité** n'a été réalisé. N'exposez pas cette application sur internet.
+- C'est un projet personnel — fourni tel quel, sans garantie, sans support officiel, et sans engagement sur les demandes de fonctionnalités ou corrections de bugs.
+- Vous êtes libre d'utiliser, forker et adapter le projet pour vos besoins, mais vous le faites **sous votre propre responsabilité**.
+- Il y a probablement des bugs. Je fais de mon mieux, mais c'est un projet hobby, pas un logiciel de production.
+
+Si ça vous est utile, tant mieux ! Gardez juste en tête ce que vous exécutez.
+
+---
+
 ## Licence
 
 MIT

@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Removarr — Setup</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiIgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIj4KICA8cmVjdCB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHJ4PSI4IiBmaWxsPSIjMTExIi8+CiAgPHJlY3QgeD0iMSIgeT0iMSIgd2lkdGg9IjMwIiBoZWlnaHQ9IjMwIiByeD0iNy41IiBmaWxsPSJub25lIiBzdHJva2U9IiNlNTNlM2UiIHN0cm9rZS13aWR0aD0iMS41Ii8+CiAgPGcgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBmaWxsPSJub25lIj4KICAgIDxwYXRoIGQ9Ik0xMCAxM2gxMmwtMS41IDExYTEgMSAwIDAxLTEgLjlIMTIuNWExIDEgMCAwMS0xLS45eiIgc3Ryb2tlLXdpZHRoPSIxLjQiLz4KICAgIDxsaW5lIHgxPSI4IiB5MT0iMTMiIHgyPSIyNCIgeTI9IjEzIiBzdHJva2Utd2lkdGg9IjEuNiIvPgogICAgPHBhdGggZD0iTTEzLjUgMTEuNWEuNi42IDAgMDEuNi0uNWgzLjhhLjYuNiAwIDAxLjYuNVYxM2gtNXoiIHN0cm9rZS13aWR0aD0iMS4zIi8+CiAgICA8bGluZSB4MT0iMTQiIHkxPSIxNi41IiB4Mj0iMTQiIHkyPSIyMS41IiBzdHJva2Utd2lkdGg9IjEuMyIgb3BhY2l0eT0iMC42Ii8+CiAgICA8bGluZSB4MT0iMTYiIHkxPSIxNi41IiB4Mj0iMTYiIHkyPSIyMS41IiBzdHJva2Utd2lkdGg9IjEuMyIgb3BhY2l0eT0iMC42Ii8+CiAgICA8bGluZSB4MT0iMTgiIHkxPSIxNi41IiB4Mj0iMTgiIHkyPSIyMS41IiBzdHJva2Utd2lkdGg9IjEuMyIgb3BhY2l0eT0iMC42Ii8+CiAgPC9nPgo8L3N2Zz4=">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --surface2: #1a1a24;
+    --border: #2a2a3a;
+    --accent: #ff4444;
+    --accent-dim: rgba(255,68,68,0.12);
+    --green: #22c55e;
+    --text: #e8e8f0;
+    --text-dim: #6b6b80;
+    --text-mid: #a0a0b8;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  .wizard {
+    width: 100%;
+    max-width: 520px;
+    animation: fadeIn 0.4s ease;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── Header ── */
+  .wizard-header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  .wizard-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .wizard-logo-text {
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+  }
+  .wizard-logo-text span { color: var(--accent); }
+  .wizard-subtitle {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+
+  /* ── Steps indicator ── */
+  .steps-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    margin-bottom: 28px;
+  }
+  .step-dot {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px; font-weight: 700;
+    color: var(--text-dim);
+    transition: all 0.3s;
+    flex-shrink: 0;
+  }
+  .step-dot.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-dim);
+  }
+  .step-dot.done {
+    border-color: var(--green);
+    color: var(--green);
+    background: rgba(34,197,94,0.1);
+  }
+  .step-line {
+    width: 40px; height: 2px;
+    background: var(--border);
+    transition: background 0.3s;
+  }
+  .step-line.done { background: var(--green); }
+
+  /* ── Step content ── */
+  .step-panel {
+    display: none;
+    animation: slideIn 0.3s ease;
+  }
+  .step-panel.active { display: block; }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(16px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+
+  .step-title {
+    font-size: 18px;
+    font-weight: 800;
+    margin-bottom: 4px;
+  }
+  .step-desc {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 20px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ── Card ── */
+  .setup-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 12px;
+  }
+  .setup-card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .setup-card-header .icon { font-size: 18px; }
+  .setup-card-header .badge {
+    margin-left: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.05);
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+  }
+  .setup-card-header .badge.required {
+    color: var(--accent);
+    border-color: rgba(255,68,68,0.3);
+    background: var(--accent-dim);
+  }
+
+  /* ── Fields ── */
+  .field {
+    margin-bottom: 14px;
+  }
+  .field:last-child { margin-bottom: 0; }
+  .field label {
+    display: block;
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    font-family: 'JetBrains Mono', monospace;
+    margin-bottom: 5px;
+  }
+  .field input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 10px 12px;
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .field input:focus { border-color: var(--accent); }
+  .field input::placeholder { color: var(--text-dim); }
+
+  .secret-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .secret-wrap input { padding-right: 38px; }
+  .toggle-eye {
+    position: absolute;
+    right: 8px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-dim);
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    border-radius: 4px;
+    transition: color 0.15s;
+  }
+  .toggle-eye:hover { color: var(--text); }
+  .toggle-eye.visible { color: var(--accent); }
+
+  .field-hint {
+    font-size: 10px;
+    color: var(--text-dim);
+    font-family: 'JetBrains Mono', monospace;
+    margin-top: 4px;
+  }
+
+  .field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  /* ── Test button inline ── */
+  .test-inline {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .test-btn {
+    padding: 6px 16px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: none;
+    color: var(--text-dim);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .test-btn:hover { border-color: var(--text-dim); color: var(--text); }
+  .test-result {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+  }
+  .test-result.ok { color: var(--green); }
+  .test-result.err { color: var(--accent); }
+
+  /* ── Navigation ── */
+  .wizard-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 24px;
+    gap: 12px;
+  }
+  .btn-back {
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: none;
+    color: var(--text-dim);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-back:hover { color: var(--text); border-color: var(--text-dim); }
+  .btn-next {
+    padding: 10px 28px;
+    border-radius: 8px;
+    border: none;
+    background: var(--accent);
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+    box-shadow: 0 4px 16px rgba(255,68,68,0.3);
+    margin-left: auto;
+  }
+  .btn-next:hover { background: #ff2222; }
+  .btn-next:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-skip {
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: none;
+    color: var(--text-dim);
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-skip:hover { color: var(--text); }
+
+  /* ── Toast ── */
+  .toast-wrap {
+    position: fixed; bottom: 24px; right: 24px; z-index: 100;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .toast {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 12px 16px;
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    animation: toastIn 0.25s ease;
+  }
+  .toast.ok  { border-color: rgba(34,197,94,0.4); color: var(--green); }
+  .toast.err { border-color: rgba(255,68,68,0.4); color: var(--accent); }
+  @keyframes toastIn {
+    from { opacity:0; transform: translateX(16px); }
+    to   { opacity:1; transform: translateX(0); }
+  }
+
+  .spinner {
+    width: 14px; height: 14px;
+    border: 2px solid var(--border); border-top-color: var(--accent);
+    border-radius: 50%; animation: spin 0.7s linear infinite;
+    display: inline-block;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  @media (max-width: 600px) {
+    body { padding: 16px; }
+    .wizard { max-width: 100%; }
+    .field-row { grid-template-columns: 1fr; }
+    .step-line { width: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wizard">
+  <div class="wizard-header">
+    <div class="wizard-logo">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="36" height="36">
+        <rect width="32" height="32" rx="8" fill="#111"/>
+        <rect x="1" y="1" width="30" height="30" rx="7.5" fill="none" stroke="#e53e3e" stroke-width="1.5"/>
+        <g stroke="white" stroke-linecap="round" stroke-linejoin="round" fill="none">
+          <path d="M10 13h12l-1.5 11a1 1 0 01-1 .9H12.5a1 1 0 01-1-.9z" stroke-width="1.4"/>
+          <line x1="8" y1="13" x2="24" y2="13" stroke-width="1.6"/>
+          <path d="M13.5 11.5a.6.6 0 01.6-.5h3.8a.6.6 0 01.6.5V13h-5z" stroke-width="1.3"/>
+          <line x1="14" y1="16.5" x2="14" y2="21.5" stroke-width="1.3" opacity="0.6"/>
+          <line x1="16" y1="16.5" x2="16" y2="21.5" stroke-width="1.3" opacity="0.6"/>
+          <line x1="18" y1="16.5" x2="18" y2="21.5" stroke-width="1.3" opacity="0.6"/>
+        </g>
+      </svg>
+      <span class="wizard-logo-text">Remov<span>arr</span></span>
+    </div>
+    <div class="wizard-subtitle">Configuration initiale</div>
+  </div>
+
+  <!-- Steps bar -->
+  <div class="steps-bar">
+    <div class="step-dot active" id="sd-1">1</div>
+    <div class="step-line" id="sl-1"></div>
+    <div class="step-dot" id="sd-2">2</div>
+    <div class="step-line" id="sl-2"></div>
+    <div class="step-dot" id="sd-3">3</div>
+  </div>
+
+  <!-- Step 1: Account -->
+  <div class="step-panel active" id="step-1">
+    <div class="step-title">🔒 Compte administrateur</div>
+    <div class="step-desc">Protège l'accès à Removarr avec un identifiant</div>
+
+    <div class="setup-card">
+      <div class="field">
+        <label>Nom d'utilisateur</label>
+        <input type="text" id="s-username" value="admin" placeholder="admin" autocomplete="off">
+      </div>
+      <div class="field">
+        <label>Mot de passe</label>
+        <div class="secret-wrap">
+          <input type="password" id="s-password" placeholder="Choisir un mot de passe" autocomplete="new-password">
+          <button type="button" class="toggle-eye" onclick="toggleEye('s-password', this)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="field">
+        <label>Confirmer le mot de passe</label>
+        <div class="secret-wrap">
+          <input type="password" id="s-password2" placeholder="Confirmer" autocomplete="new-password">
+          <button type="button" class="toggle-eye" onclick="toggleEye('s-password2', this)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+        <div class="field-hint" id="pw-match-hint"></div>
+      </div>
+    </div>
+
+    <div class="wizard-nav">
+      <div></div>
+      <button class="btn-next" onclick="goStep(2)">Suivant →</button>
+    </div>
+  </div>
+
+  <!-- Step 2: Core services -->
+  <div class="step-panel" id="step-2">
+    <div class="step-title">⚡ Services principaux</div>
+    <div class="step-desc">Au moins Radarr ou Sonarr est requis</div>
+
+    <div class="setup-card">
+      <div class="setup-card-header">
+        <span class="icon">🎬</span> Radarr
+        <span class="badge">optionnel</span>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>URL</label>
+          <input type="text" id="s-radarr-url" placeholder="http://192.168.0.x:7878">
+        </div>
+        <div class="field">
+          <label>Clé API</label>
+          <div class="secret-wrap">
+            <input type="password" id="s-radarr-key" placeholder="Clé API Radarr">
+            <button type="button" class="toggle-eye" onclick="toggleEye('s-radarr-key', this)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="test-inline">
+        <button class="test-btn" onclick="testSetup('radarr')">Tester</button>
+        <span class="test-result" id="tr-radarr"></span>
+      </div>
+    </div>
+
+    <div class="setup-card">
+      <div class="setup-card-header">
+        <span class="icon">📺</span> Sonarr
+        <span class="badge">optionnel</span>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>URL</label>
+          <input type="text" id="s-sonarr-url" placeholder="http://192.168.0.x:8989">
+        </div>
+        <div class="field">
+          <label>Clé API</label>
+          <div class="secret-wrap">
+            <input type="password" id="s-sonarr-key" placeholder="Clé API Sonarr">
+            <button type="button" class="toggle-eye" onclick="toggleEye('s-sonarr-key', this)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="test-inline">
+        <button class="test-btn" onclick="testSetup('sonarr')">Tester</button>
+        <span class="test-result" id="tr-sonarr"></span>
+      </div>
+    </div>
+
+    <div class="setup-card">
+      <div class="setup-card-header">
+        <span class="icon">⚡</span> qBittorrent
+        <span class="badge required">recommandé</span>
+      </div>
+      <div class="field">
+        <label>URL</label>
+        <input type="text" id="s-qbit-url" placeholder="http://192.168.0.x:8090">
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Utilisateur</label>
+          <input type="text" id="s-qbit-user" value="admin" placeholder="admin">
+        </div>
+        <div class="field">
+          <label>Mot de passe</label>
+          <div class="secret-wrap">
+            <input type="password" id="s-qbit-pass" placeholder="Mot de passe">
+            <button type="button" class="toggle-eye" onclick="toggleEye('s-qbit-pass', this)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="test-inline">
+        <button class="test-btn" onclick="testSetup('qbit')">Tester</button>
+        <span class="test-result" id="tr-qbit"></span>
+      </div>
+    </div>
+
+    <div class="wizard-nav">
+      <button class="btn-back" onclick="goStep(1)">← Retour</button>
+      <button class="btn-next" id="btn-step2-next" onclick="goStep(3)">Suivant →</button>
+    </div>
+  </div>
+
+  <!-- Step 3: Optional services -->
+  <div class="step-panel" id="step-3">
+    <div class="step-title">🎭 Services optionnels</div>
+    <div class="step-desc">Posters, demandes Seerr, historique de lecture</div>
+
+    <div class="setup-card" style="border-color: rgba(255,68,68,0.4);">
+      <div class="setup-card-header">
+        <span class="icon">🎭</span> TMDB
+        <span class="badge required">fortement recommandé</span>
+      </div>
+      <div style="background:var(--accent-dim);border:1px solid rgba(255,68,68,0.3);border-radius:8px;padding:10px 12px;margin-bottom:14px;font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--accent);line-height:1.5">
+        ⚠️ Sans TMDB, aucun poster ne sera affiché — l'interface sera beaucoup moins lisible.
+      </div>
+      <div class="field">
+        <label>Clé API / Bearer Token</label>
+        <div class="secret-wrap">
+          <input type="password" id="s-tmdb-key" placeholder="Clé API ou Bearer Token v4">
+          <button type="button" class="toggle-eye" onclick="toggleEye('s-tmdb-key', this)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+        <div class="field-hint">Gratuit → <a href="https://www.themoviedb.org/settings/api" target="_blank" style="color:var(--accent)">themoviedb.org/settings/api</a></div>
+      </div>
+      <div class="test-inline">
+        <button class="test-btn" onclick="testSetup('tmdb')">Tester</button>
+        <span class="test-result" id="tr-tmdb"></span>
+      </div>
+    </div>
+
+    <div class="setup-card">
+      <div class="setup-card-header">
+        <span class="icon">🔭</span> Seerr / Overseerr
+        <span class="badge">demandes</span>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>URL</label>
+          <input type="text" id="s-seerr-url" placeholder="http://192.168.0.x:5055">
+        </div>
+        <div class="field">
+          <label>Clé API</label>
+          <div class="secret-wrap">
+            <input type="password" id="s-seerr-key" placeholder="Clé API Seerr">
+            <button type="button" class="toggle-eye" onclick="toggleEye('s-seerr-key', this)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="test-inline">
+        <button class="test-btn" onclick="testSetup('seerr')">Tester</button>
+        <span class="test-result" id="tr-seerr"></span>
+      </div>
+    </div>
+
+    <div class="setup-card">
+      <div class="setup-card-header">
+        <span class="icon">📊</span> Tautulli
+        <span class="badge">historique</span>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>URL</label>
+          <input type="text" id="s-tautulli-url" placeholder="http://192.168.0.x:8181">
+        </div>
+        <div class="field">
+          <label>Clé API</label>
+          <div class="secret-wrap">
+            <input type="password" id="s-tautulli-key" placeholder="Clé API Tautulli">
+            <button type="button" class="toggle-eye" onclick="toggleEye('s-tautulli-key', this)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="test-inline">
+        <button class="test-btn" onclick="testSetup('tautulli')">Tester</button>
+        <span class="test-result" id="tr-tautulli"></span>
+      </div>
+    </div>
+
+    <div class="wizard-nav">
+      <button class="btn-back" onclick="goStep(2)">← Retour</button>
+      <button class="btn-skip" onclick="finishSetup()" style="margin-right:8px">Passer</button>
+      <button class="btn-next" id="btn-finish" onclick="finishSetup()">🚀 Terminer</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toast-wrap"></div>
+
+<script>
+let currentStep = 1;
+
+function toggleEye(inputId, btn) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  const isPassword = input.type === 'password';
+  input.type = isPassword ? 'text' : 'password';
+  btn.classList.toggle('visible', isPassword);
+}
+
+function goStep(n) {
+  // Validate current step before advancing
+  if (n > currentStep) {
+    if (currentStep === 1) {
+      const pw = document.getElementById('s-password').value;
+      const pw2 = document.getElementById('s-password2').value;
+      if (pw && pw !== pw2) {
+        document.getElementById('pw-match-hint').textContent = '⚠ Les mots de passe ne correspondent pas';
+        document.getElementById('pw-match-hint').style.color = 'var(--accent)';
+        return;
+      }
+      document.getElementById('pw-match-hint').textContent = '';
+    }
+    if (currentStep === 2) {
+      const hasRadarr = document.getElementById('s-radarr-url').value && document.getElementById('s-radarr-key').value;
+      const hasSonarr = document.getElementById('s-sonarr-url').value && document.getElementById('s-sonarr-key').value;
+      if (!hasRadarr && !hasSonarr) {
+        toast('Configure au moins Radarr ou Sonarr', 'err');
+        return;
+      }
+    }
+  }
+
+  // Hide current, show target
+  document.getElementById('step-' + currentStep).classList.remove('active');
+  document.getElementById('step-' + n).classList.add('active');
+
+  // Update dots
+  for (let i = 1; i <= 3; i++) {
+    const dot = document.getElementById('sd-' + i);
+    dot.classList.remove('active', 'done');
+    if (i < n) dot.classList.add('done');
+    else if (i === n) dot.classList.add('active');
+    // Update done icon
+    dot.textContent = i < n ? '✓' : String(i);
+  }
+  // Update lines
+  for (let i = 1; i <= 2; i++) {
+    const line = document.getElementById('sl-' + i);
+    line.classList.toggle('done', i < n);
+  }
+
+  currentStep = n;
+}
+
+async function testSetup(service) {
+  const btn = event.target;
+  const res = document.getElementById('tr-' + service);
+  btn.textContent = '…'; btn.disabled = true;
+  res.textContent = ''; res.className = 'test-result';
+
+  const payload = { service };
+  if (service === 'radarr') {
+    payload.url = document.getElementById('s-radarr-url').value;
+    payload.api_key = document.getElementById('s-radarr-key').value;
+  } else if (service === 'sonarr') {
+    payload.url = document.getElementById('s-sonarr-url').value;
+    payload.api_key = document.getElementById('s-sonarr-key').value;
+  } else if (service === 'qbit') {
+    payload.url = document.getElementById('s-qbit-url').value;
+    payload.username = document.getElementById('s-qbit-user').value;
+    payload.password = document.getElementById('s-qbit-pass').value;
+  } else if (service === 'tmdb') {
+    payload.api_key = document.getElementById('s-tmdb-key').value;
+  } else if (service === 'seerr') {
+    payload.url = document.getElementById('s-seerr-url').value;
+    payload.api_key = document.getElementById('s-seerr-key').value;
+  } else if (service === 'tautulli') {
+    payload.url = document.getElementById('s-tautulli-url').value;
+    payload.api_key = document.getElementById('s-tautulli-key').value;
+  }
+
+  try {
+    const r = await fetch('/api/setup/test', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(payload)
+    });
+    const d = await r.json();
+    if (d.ok) {
+      res.textContent = '✅ Connecté';
+      res.className = 'test-result ok';
+    } else {
+      res.textContent = '❌ ' + (d.error || 'Échec');
+      res.className = 'test-result err';
+    }
+  } catch(e) {
+    res.textContent = '❌ Erreur réseau';
+    res.className = 'test-result err';
+  }
+  btn.textContent = 'Tester'; btn.disabled = false;
+}
+
+async function finishSetup() {
+  const btn = document.getElementById('btn-finish');
+  btn.disabled = true;
+  btn.textContent = '⏳ Enregistrement…';
+
+  const payload = {
+    removarr_username: document.getElementById('s-username').value || 'admin',
+    removarr_password: document.getElementById('s-password').value || '',
+    radarr_url:     document.getElementById('s-radarr-url').value,
+    radarr_api_key: document.getElementById('s-radarr-key').value,
+    sonarr_url:     document.getElementById('s-sonarr-url').value,
+    sonarr_api_key: document.getElementById('s-sonarr-key').value,
+    qbit_url:       document.getElementById('s-qbit-url').value,
+    qbit_username:  document.getElementById('s-qbit-user').value,
+    qbit_password:  document.getElementById('s-qbit-pass').value,
+    tmdb_api_key:   document.getElementById('s-tmdb-key').value,
+    seerr_url:      document.getElementById('s-seerr-url').value,
+    seerr_api_key:  document.getElementById('s-seerr-key').value,
+    tautulli_url:   document.getElementById('s-tautulli-url').value,
+    tautulli_api_key: document.getElementById('s-tautulli-key').value,
+  };
+
+  try {
+    const r = await fetch('/api/setup', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(payload)
+    });
+    const d = await r.json();
+    if (d.success) {
+      toast('✅ Configuration sauvegardée !', 'ok');
+      setTimeout(() => { window.location.href = '/'; }, 1000);
+    } else {
+      toast(d.error || 'Erreur de sauvegarde', 'err');
+      btn.disabled = false;
+      btn.textContent = '🚀 Terminer';
+    }
+  } catch(e) {
+    toast('Erreur réseau', 'err');
+    btn.disabled = false;
+    btn.textContent = '🚀 Terminer';
+  }
+}
+
+function toast(msg, type='ok') {
+  const wrap = document.getElementById('toast-wrap');
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.textContent = msg;
+  wrap.appendChild(t);
+  setTimeout(() => t.remove(), 4000);
+}
+
+// Password match check
+document.getElementById('s-password2').addEventListener('input', () => {
+  const pw = document.getElementById('s-password').value;
+  const pw2 = document.getElementById('s-password2').value;
+  const hint = document.getElementById('pw-match-hint');
+  if (!pw2) { hint.textContent = ''; return; }
+  if (pw === pw2) {
+    hint.textContent = '✅ Mots de passe identiques';
+    hint.style.color = 'var(--green)';
+  } else {
+    hint.textContent = '⚠ Les mots de passe ne correspondent pas';
+    hint.style.color = 'var(--accent)';
+  }
+});
+</script>
+</body>
+</html>

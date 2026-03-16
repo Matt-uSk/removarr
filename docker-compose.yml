@@ -1,0 +1,60 @@
+version: "3.8"
+
+services:
+  removarr:
+    image: removarr:latest
+    build: .
+    container_name: removarr
+    restart: unless-stopped
+    ports:
+      - "5999:5000"
+    volumes:
+      - removarr-data:/data          # cache TMDB persistant
+    environment:
+      # ── Radarr ──────────────────────────────────────────────
+      - RADARR_URL=http://192.168.1.x:7878
+      - RADARR_API_KEY=VOTRE_CLE_API_RADARR
+
+      # ── Sonarr ──────────────────────────────────────────────
+      - SONARR_URL=http://192.168.1.x:8989
+      - SONARR_API_KEY=VOTRE_CLE_API_SONARR
+
+      # ── qBittorrent ─────────────────────────────────────────
+      - QBIT_URL=http://192.168.1.x:8080
+      - QBIT_USERNAME=admin
+      - QBIT_PASSWORD=adminadmin
+
+      # ── TMDB (pour les posters) ──────────────────────────────
+      # Clé gratuite sur https://www.themoviedb.org/settings/api
+      - TMDB_API_KEY=VOTRE_CLE_TMDB
+
+      # ── Seerr (optionnel) ───────────────────────────────────────
+      - SEERR_URL=http://192.168.1.x:5055
+      - SEERR_API_KEY=VOTRE_CLE_API_SEERR
+
+      # ── Tautulli (optionnel) ─────────────────────────────────────
+      # Affiche les stats de lecture (jamais vu, date, nb lectures)
+      # - TAUTULLI_URL=http://192.168.1.x:8181
+      # - TAUTULLI_API_KEY=VOTRE_CLE_API_TAUTULLI
+
+      # ── Cache ────────────────────────────────────────────────
+      - CACHE_FILE=/data/tmdb_cache.json
+
+      # ── Sécurité (optionnel) ─────────────────────────────────
+      # Mot de passe pour accéder à l'interface (désactivé si vide)
+      # - REMOVARR_PASSWORD=changeme
+      # IPs autorisées, CIDR ou IP fixe, séparées par virgule (vide = toutes)
+      # - REMOVARR_ALLOWED_IPS=192.168.0.0/24,10.0.0.1
+      # Clé secrète pour signer les sessions (générée auto si vide)
+      # - SECRET_KEY=une_longue_chaine_aleatoire
+
+    # networks:
+    #   - arr-network
+
+volumes:
+  removarr-data:
+    driver: local
+
+# networks:
+#   arr-network:
+#     external: true

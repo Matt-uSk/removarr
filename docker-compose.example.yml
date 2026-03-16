@@ -1,0 +1,39 @@
+services:
+  removarr:
+    build: .
+    container_name: removarr
+    restart: unless-stopped
+    ports:
+      - "5999:5000"          # Changer 5999 par le port souhaité
+    environment:
+      # ── Radarr (optionnel) ──────────────────────────────────────
+      - RADARR_URL=http://192.168.1.10:7878
+      - RADARR_API_KEY=your_radarr_api_key
+
+      # ── Sonarr (optionnel) ──────────────────────────────────────
+      - SONARR_URL=http://192.168.1.10:8989
+      - SONARR_API_KEY=your_sonarr_api_key
+
+      # ── qBittorrent ─────────────────────────────────────────────
+      - QBIT_URL=http://192.168.1.10:8090
+      - QBIT_USERNAME=admin
+      - QBIT_PASSWORD=your_qbit_password
+
+      # ── TMDB (optionnel — pour les posters HD) ──────────────────
+      # API key v3 ou Bearer token v4
+      - TMDB_API_KEY=your_tmdb_api_key
+
+      # ── Seerr / Overseerr (optionnel) ───────────────────────────
+      - SEERR_URL=http://192.168.1.10:5055
+      - SEERR_API_KEY=your_seerr_api_key
+
+      # ── Cache ───────────────────────────────────────────────────
+      - CACHE_FILE=/data/tmdb_cache.json
+
+    volumes:
+      # Données persistantes : settings, cache TMDB, posters
+      - /path/to/your/data:/data
+
+    # Timezone (optionnel)
+    # environment:
+    #   - TZ=Europe/Paris

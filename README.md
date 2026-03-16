@@ -2,6 +2,16 @@
 
 **Removarr** is a self-hosted web UI to clean up your media library — delete movies and series from Radarr/Sonarr, remove all associated torrents from qBittorrent (including cross-seeds), and free up disk space. All from a single click.
 
+> **⚠️ Important — please read before using:**
+>
+> - This project was built primarily using **AI-assisted development** (vibe-coded with Claude)
+> - **No security audit** has been performed
+> - **Do NOT expose this to the internet** — local network use only
+> - Provided **as-is**, no warranty — use at your own risk
+> - This is a personal project, not a product — **no support, no feature requests**
+>
+> I built this for my own homelab. If it's useful to you, feel free to use it, but you're responsible for how you run it. There are probably bugs. I do my best.
+
 ---
 
 ## Features
@@ -212,21 +222,6 @@ Mount a volume on `/data`:
 - All hardcoded French strings replaced with i18n
 - Scan progress widget with real-time updates
 - Session cache fixes (no more ghost entries after delete)
-
----
-
-## Disclaimer
-
-This project was built primarily using AI-assisted development (vibe coding with Claude / Anthropic). It was made for personal use on a home network.
-
-**⚠️ Important:**
-
-- **No security audit** has been performed. Do not expose this application to the internet.
-- This is a personal project — provided as-is, with no warranty, no official support, and no commitment to feature requests or bug fixes.
-- You are welcome to use, fork, and adapt it for your own needs, but you do so **at your own risk and responsibility**.
-- There are probably bugs. I do my best, but this is a hobby project, not production software.
-
-If you find it useful, great! Just be aware of what you're running.
 
 ---
 

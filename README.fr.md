@@ -1,150 +1,135 @@
 # Removarr
 
-**Removarr** est une interface web auto-hébergée pour supprimer des médias depuis Radarr/Sonarr et retirer automatiquement tous les torrents associés dans qBittorrent (cross-seeds inclus) — avec suppression des fichiers sur le disque.
+**Removarr** est une interface web auto-hébergée pour nettoyer votre bibliothèque média — supprimer films et séries de Radarr/Sonarr, retirer tous les torrents associés de qBittorrent (cross-seeds inclus), et libérer l'espace disque. Le tout en un clic.
 
 ---
 
 ## Fonctionnalités
 
-- Bibliothèque complète (films Radarr + séries Sonarr) avec posters, taille, année, compteur de torrents
-- **Suppression en cascade** : Radarr/Sonarr (fichiers inclus) → qBittorrent (tous torrents + cross-seeds + fichiers disque)
-- Détection des cross-seeds par matching de torrents avec normalisation Unicode des titres alternatifs (TMDB + Radarr/Sonarr natifs)
-- Panneau torrent par média : voir, retirer individuellement, ou supprimer entièrement avec fichiers
-- Intégration Seerr/Overseerr : suppression automatique des demandes associées
-- Intégration Tautulli : badges d'historique de lecture ("Jamais vu", date du dernier visionnage, nombre de lectures)
-- Sélection multiple avec barre d'action pour suppression groupée
-- Recherche, filtres (Films / Séries), tri multi-critères (titre, taille, année, torrents, date de visionnage)
-- Vue grille avec taille de cartes ajustable + vue liste
-- Widget de progression du scan en temps réel
-- Cache posters local (`/data/posters/`) + cache TMDB (`/data/tmdb_cache.json`)
-- Enrichissement haute performance : index inversé par mots pour le matching torrents, cache multi-niveaux
-- Interface multilingue (FR / EN + extensible), détection automatique du navigateur
-- Page de réglages avec test de connexion par service (Radarr, Sonarr, qBittorrent, TMDB, Seerr, Tautulli)
-- Indicateurs de statut en temps réel (pill services avec dropdown)
-- Authentification par mot de passe + whitelist IP (optionnel)
-- Design responsive mobile
-- Numéro de version affiché dans les réglages et en tooltip sur le logo
+### Cœur
+- **Suppression en cascade** : un clic supprime le média de Radarr/Sonarr, retire tous les torrents associés de qBittorrent (cross-seeds inclus), et efface les fichiers du disque
+- Détection des cross-seeds par matching de titres normalisé Unicode (gère les accents : Yoroï ↔ Yoroi)
+- Panneau torrent par média : inspecter, retirer individuellement, ou supprimer entièrement
+- Sélection multiple avec barre d'action groupée
+- Vue grille (taille ajustable) + Vue liste
+
+### Intégrations
+- **Radarr** / **Sonarr** — gestion de la bibliothèque + suppression des fichiers
+- **qBittorrent** — suppression des torrents + fichiers
+- **TMDB** — posters HD + matching des titres alternatifs
+- **Seerr / Overseerr** — nettoyage automatique des demandes à la suppression
+- **Tautulli** — badges d'historique de lecture (jamais vu, dernier visionnage, nombre de lectures)
+
+### Performance
+- Scan complet de 700 items en **~9 secondes** (index inversé par mots, cache multi-niveaux)
+- Métadonnées TMDB en cache sur disque, données qBittorrent en cache mémoire
+- Enrichissement en arrière-plan avec widget de progression en temps réel
+
+### Interface
+- Assistant de configuration au premier lancement (aucun fichier de config nécessaire)
+- Recherche, filtres (Films / Séries / Masquer sans torrent / Jamais vu), tri multi-critères
+- Multilingue (FR / EN + extensible), détection automatique du navigateur
+- Responsive mobile
+- Indicateurs de statut des services avec vérification de connectivité
+
+### Sécurité
+- **Assistant de configuration** crée le compte admin au premier lancement
+- Identifiant + mot de passe configurables depuis les Réglages (stocké en hash SHA-256)
+- Toutes les clés API **chiffrées au repos** (Fernet/AES-128-CBC) dans `settings.json`
+- Whitelist IP (support CIDR)
+- Tous les champs sensibles masqués avec bouton œil dans l'interface
 
 ---
 
-## Prérequis
+## Démarrage rapide
 
-- Docker + Docker Compose
-- Au moins **Radarr** ou **Sonarr** configuré
-- **qBittorrent** avec l'API Web activée
-- *(Optionnel)* Compte TMDB pour les posters HD et le matching des titres alternatifs
-- *(Optionnel)* Seerr / Overseerr pour la gestion des demandes
-- *(Optionnel)* Tautulli pour l'historique de lecture
+```bash
+# 1. Cloner
+git clone https://github.com/Matt17000/removarr.git
+cd removarr
+
+# 2. Lancer
+docker compose up -d
+
+# 3. Ouvrir
+# → http://<votre-ip>:5999
+# L'assistant de configuration vous guide
+```
+
+C'est tout. Aucune variable d'environnement nécessaire — l'assistant s'occupe de tout.
 
 ---
 
 ## Installation
 
-### 1. Structure des fichiers
-
-```
-removarr/
-├── app.py
-├── Dockerfile
-├── docker-compose.yml
-├── docker-compose.example.yml
-├── requirements.txt
-├── template.json          ← modèle vide pour les traductions
-├── README.md
-├── README.fr.md
-├── locales/
-│   ├── fr.json
-│   └── en.json
-└── templates/
-    ├── index.html
-    ├── settings.html
-    └── login.html
-```
-
-### 2. Configurer le `docker-compose.yml`
+### Docker Compose
 
 ```yaml
-environment:
-  - CACHE_FILE=/data/tmdb_cache.json
-  - RADARR_URL=http://192.168.1.10:7878
-  - RADARR_API_KEY=votre_cle_radarr
-  - SONARR_URL=http://192.168.1.10:8989
-  - SONARR_API_KEY=votre_cle_sonarr
-  - QBIT_URL=http://192.168.1.10:8080
-  - QBIT_USERNAME=admin
-  - QBIT_PASSWORD=votre_mot_de_passe_qbit
-  - TMDB_API_KEY=votre_cle_tmdb
-  - SEERR_URL=http://192.168.1.10:5055
-  - SEERR_API_KEY=votre_cle_seerr
-  - TAUTULLI_URL=http://192.168.1.10:8181
-  - TAUTULLI_API_KEY=votre_cle_tautulli
+services:
+  removarr:
+    build: .
+    container_name: removarr
+    restart: unless-stopped
+    ports:
+      - "5999:5000"
+    volumes:
+      - removarr-data:/data    # settings, cache TMDB, posters
+    environment:
+      - SECRET_KEY=votre_chaine_aleatoire   # optionnel mais recommandé — openssl rand -hex 32
+
+volumes:
+  removarr-data:
 ```
 
-### 3. Lancer
+> **Note** : `SECRET_KEY` sert à chiffrer les clés API au repos et signer les sessions. Sans cette variable, une clé aléatoire est générée à chaque redémarrage (ce qui invalide les sessions et les clés chiffrées). Définissez-la une fois.
 
-```bash
-docker compose up -d
-```
+### Premier lancement
 
-Accéder à l'interface : `http://<votre-ip>:5999`
+1. Ouvrir `http://<votre-ip>:5999`
+2. L'assistant de configuration apparaît en 3 étapes :
+   - **Étape 1** — Créer le compte admin (identifiant + mot de passe)
+   - **Étape 2** — Configurer Radarr, Sonarr, qBittorrent (avec test de connexion)
+   - **Étape 3** — Services optionnels : TMDB (posters), Seerr (demandes), Tautulli (historique)
+3. Terminé — vous êtes connecté et la bibliothèque se charge
 
----
+### Avancé : variables d'environnement
 
-## Configuration
+Tous les réglages peuvent aussi être passés en variables d'environnement (utile pour l'automatisation). L'assistant / la page Réglages prend la priorité.
 
-La configuration peut se faire de deux manières :
-
-1. **Variables d'environnement** dans `docker-compose.yml` (recommandé au départ)
-2. **Page Réglages** (`/settings`) — les valeurs sont sauvegardées dans `/data/settings.json` et prennent le dessus
-
-### Variables d'environnement disponibles
-
-| Variable | Description | Requis |
-|---|---|---|
-| `RADARR_URL` | URL de Radarr | Non* |
-| `RADARR_API_KEY` | Clé API Radarr | Non* |
-| `SONARR_URL` | URL de Sonarr | Non* |
-| `SONARR_API_KEY` | Clé API Sonarr | Non* |
-| `QBIT_URL` | URL de la WebUI qBittorrent | Non |
-| `QBIT_USERNAME` | Utilisateur qBittorrent | Non |
-| `QBIT_PASSWORD` | Mot de passe qBittorrent | Non |
-| `TMDB_API_KEY` | Clé API TMDB ou Bearer Token v4 | Non |
-| `SEERR_URL` | URL de Seerr/Overseerr | Non |
-| `SEERR_API_KEY` | Clé API Seerr/Overseerr | Non |
-| `TAUTULLI_URL` | URL de Tautulli | Non |
-| `TAUTULLI_API_KEY` | Clé API Tautulli | Non |
-| `CACHE_FILE` | Chemin du cache TMDB (défaut : `/data/tmdb_cache.json`) | Non |
-
-\*Au moins Radarr ou Sonarr est requis.
+| Variable | Description |
+|---|---|
+| `RADARR_URL` / `RADARR_API_KEY` | Connexion Radarr |
+| `SONARR_URL` / `SONARR_API_KEY` | Connexion Sonarr |
+| `QBIT_URL` / `QBIT_USERNAME` / `QBIT_PASSWORD` | Connexion qBittorrent |
+| `TMDB_API_KEY` | Clé API TMDB ou Bearer Token v4 |
+| `SEERR_URL` / `SEERR_API_KEY` | Connexion Seerr/Overseerr |
+| `TAUTULLI_URL` / `TAUTULLI_API_KEY` | Connexion Tautulli |
+| `REMOVARR_PASSWORD` | Mot de passe (fallback si non configuré via l'UI) |
+| `REMOVARR_ALLOWED_IPS` | Whitelist IP, ex : `192.168.0.0/24,10.0.0.1` |
+| `SECRET_KEY` | Clé de chiffrement + sessions |
+| `CACHE_FILE` | Chemin du cache TMDB (défaut : `/data/tmdb_cache.json`) |
 
 ---
 
 ## Sécurité
 
-Removarr stocke les clés API de toute votre stack *arr. Activez l'authentification si l'instance est accessible sur un réseau partagé.
+### Comment les identifiants sont stockés
 
-### Authentification par mot de passe
-
-```yaml
-environment:
-  - REMOVARR_PASSWORD=votre_mot_de_passe
-  - SECRET_KEY=une_longue_chaine_aleatoire   # openssl rand -hex 32
-```
-
-### Whitelist IP
-
-```yaml
-environment:
-  - REMOVARR_ALLOWED_IPS=192.168.0.0/24,10.0.0.1
-```
-
-### Variables de sécurité
-
-| Variable | Description | Défaut |
+| Donnée | Méthode | Réversible |
 |---|---|---|
-| `REMOVARR_PASSWORD` | Mot de passe. Auth désactivée si vide. | *(désactivé)* |
-| `REMOVARR_ALLOWED_IPS` | IPs/CIDRs séparés par virgule. Toutes si vide. | *(toutes)* |
-| `SECRET_KEY` | Clé de signature des sessions. Auto-générée si non définie. | *(auto)* |
+| Mot de passe Removarr | Hash SHA-256 | Non (comparaison uniquement) |
+| Clés API et mots de passe services | Chiffrement Fernet (AES-128-CBC) | Oui (déchiffré à l'exécution) |
+
+Toutes les données sensibles dans `/data/settings.json` sont hashées ou chiffrées. Rien n'est stocké en clair.
+
+La clé de chiffrement est dérivée de `SECRET_KEY`. Si vous la changez ou la perdez, re-saisissez vos clés API dans les Réglages.
+
+### Authentification
+
+Configurée pendant le setup ou dans Réglages → 🔒 Sécurité :
+- **Identifiant** (défaut : `admin`)
+- **Mot de passe** (laisser vide pour désactiver l'auth)
+- **Whitelist IP** (plages CIDR, séparées par virgule)
 
 ---
 
@@ -160,20 +145,23 @@ environment:
 
 ## Données persistantes
 
+Monter un volume sur `/data` :
+
 | Chemin | Contenu |
 |---|---|
-| `/data/settings.json` | Configuration sauvegardée depuis l'interface |
-| `/data/tmdb_cache.json` | Cache des métadonnées TMDB |
-| `/data/posters/` | Cache des posters (fichiers JPG) |
+| `/data/settings.json` | Configuration complète (clés API chiffrées, auth, URLs) |
+| `/data/tmdb_cache.json` | Cache des métadonnées TMDB (titres, URLs posters) |
+| `/data/posters/` | Images des posters téléchargées (JPG) |
 
 ---
 
 ## Stack technique
 
-- **Backend** : Python 3.12 / Flask / Gunicorn (1 worker + 4 threads, timeout 180s)
-- **Frontend** : HTML/CSS/JS vanilla — aucune dépendance JS externe
+- **Backend** : Python 3.12 / Flask / Gunicorn (1 worker + 4 threads)
+- **Frontend** : HTML/CSS/JS vanilla — zéro dépendance JS externe
+- **Chiffrement** : cryptography (Fernet)
 - **Polices** : Inter + JetBrains Mono (Google Fonts)
-- **Port interne** : 5000 (mappé sur 5999 par défaut)
+- **Port** : 5000 interne (mappé sur 5999 par défaut)
 
 ---
 
@@ -181,82 +169,45 @@ environment:
 
 | Endpoint | Méthode | Description |
 |---|---|---|
-| `/api/version` | GET | Retourne `{"version": "x.y.z"}` |
-| `/api/status` | GET | Statut de connectivité des services |
-| `/api/media` | GET | Liste complète des médias Radarr/Sonarr |
+| `/api/version` | GET | `{"version": "x.y.z"}` |
+| `/api/status` | GET | Connectivité des services |
+| `/api/config-status` | GET | État du setup |
+| `/api/media` | GET | Bibliothèque complète Radarr/Sonarr |
 | `/api/media/enrich` | POST | Enrichissement par batch (posters, torrents, Tautulli) |
-| `/api/delete` | POST | Suppression média + torrents + fichiers |
-| `/api/settings` | GET/POST | Lecture/écriture des réglages |
-| `/api/seerr/requests` | POST | Récupérer les demandes Seerr pour un média |
+| `/api/delete` | POST | Suppression en cascade (média + torrents + fichiers) |
+| `/api/settings` | GET/POST | Lecture/écriture de la configuration |
+| `/api/setup` | POST | Configuration initiale (premier lancement uniquement) |
+| `/api/setup/test` | POST | Test de connectivité pendant le setup |
+| `/api/seerr/requests` | POST | Demandes Seerr pour un média |
 
 ---
 
 ## Changelog
 
-### v1.5.0 (2025-03-16)
+### v1.5.1 (2026-03-16)
+- Assistant de configuration : favicon sur toutes les pages, boutons test sur tous les services, avertissement TMDB
 
-**Sécurité**
-- Toutes les clés API et mots de passe de services sont maintenant **chiffrés au repos** dans `settings.json` via chiffrement symétrique Fernet (AES-128-CBC), dérivé du `SECRET_KEY`
-- Rétrocompatible : les anciennes valeurs non chiffrées sont lues normalement et chiffrées au prochain enregistrement
-- Hash SHA-256 pour le mot de passe Removarr, chiffrement Fernet pour les clés API — chaque donnée utilise la méthode appropriée
-- Si le `SECRET_KEY` change, les champs chiffrés deviennent illisibles (warning dans les logs) — les re-saisir dans les Réglages
+### v1.5.0 (2026-03-16)
+- Clés API chiffrées au repos (Fernet/AES-128-CBC)
+- Rétrocompatible avec les anciens settings en clair
 
-### v1.4.0 (2025-03-15)
+### v1.4.0 (2026-03-15)
+- Assistant de configuration au premier lancement (3 étapes)
+- Identifiant/mot de passe configurables depuis l'interface
+- Bouton œil sur tous les champs sensibles
+- Page de connexion avec identifiant + mot de passe
+- Filtre "Masquer sans torrent"
+- Header/toolbar sticky restaurés
 
-**Sécurité & Authentification**
-- Nom d'utilisateur + mot de passe configurables depuis la page Réglages (plus besoin de variables d'environnement)
-- Mot de passe stocké en hash SHA-256 dans `/data/settings.json` (jamais en clair)
-- Whitelist IP configurable depuis les Réglages
-- Rétrocompatible : les variables `REMOVARR_PASSWORD` et `REMOVARR_ALLOWED_IPS` fonctionnent toujours en fallback
-- La page de connexion a maintenant un champ utilisateur + mot de passe
-
-**Interface**
-- Tous les champs sensibles (clés API, mots de passe) utilisent `type="password"` avec un bouton œil pour afficher/masquer
-- Nouvelle section 🔒 Sécurité dans les Réglages avec utilisateur, mot de passe, whitelist IP
-- Badge de statut auth (✅ activé / indication pour configurer) dans les réglages
-- Filtre "Masquer sans torrent" dans la toolbar pour cacher les médias sans torrent associé
-- Header + toolbar sticky restaurés (cassés par le fix overflow-x)
-- La page Réglages se recharge après sauvegarde pour refléter l'état de l'auth
-
-### v1.3.1 (2025-03-15)
-
-**Performance**
-- Le cache TMDB est maintenant chargé au démarrage (était défini mais jamais appelé — causait ~5s/batch d'appels HTTP inutiles)
-- Index inversé par mots pour le matching torrents : recherche O(1) au lieu de scan O(n) par titre
-- Liste des torrents qBittorrent cachée 30s entre les batches d'enrichissement (14 appels HTTP → 1)
-- Taille des batches augmentée de 20 à 50 items
-- Scan complet de la bibliothèque (688 items) : **~2.5 minutes → ~9 secondes**
-
-**Corrections de bugs**
-- Les fichiers n'étaient pas supprimés du disque (`delete_torrent_files` était codé en dur à `false`)
-- Les caractères accentués empêchaient le matching de torrents (ex: Yoroï vs Yoroi) — ajout de la normalisation Unicode NFD
-- Le filtre du cache TMDB jetait les entrées avec des listes de titres vides
-- Le bouton Actualiser ne forçait pas le rechargement
-- Shadowing de variable : `t` utilisé comme paramètre dans `.map(t =>)` masquait la fonction i18n `t()` à 4 endroits
-- Le bouton Test de Tautulli retournait "service inconnu"
-- 2 workers Gunicorn causaient des incohérences d'état partagé — passé à 1 worker + 4 threads
-- Le cache de session causait un re-scan à chaque navigation et des entrées fantômes après suppression
-- Les badges de visionnage ne se mettaient pas à jour visuellement après le scan
-
-**Interface**
-- Clic sur la carte ouvre le panneau torrent, la coche (en bas à droite) gère la sélection
-- Widget de progression du scan avec barre de progression, compteur, titre en cours
-- Toutes les chaînes françaises codées en dur remplacées par des clés i18n
-- Messages d'erreur améliorés avec distinction timeout / erreur réseau
-- Cache invalidé après chaque suppression
-- Données fraîches à chaque chargement de page (cache uniquement pour la navigation réglages↔accueil)
-- Numéro de version dans les réglages et en tooltip sur le logo
-
-**Mobile**
-- Réécriture complète du responsive pour écrans < 768px
-- Header compact avec boutons icône uniquement
-- Dropdown services en position fixe (pas de débordement)
-- Handler tactile pour fermeture du dropdown
-
-**Infrastructure**
-- Headers HTTP no-cache sur les réponses HTML
-- Logs de requêtes et de timing sur les endpoints d'enrichissement et de suppression
-- Constante `APP_VERSION`, exposée via `/api/version`
+### v1.3.1 (2026-03-15)
+- Cache TMDB chargé au démarrage (688 appels HTTP économisés)
+- Index inversé pour le matching torrents (~2.5 min → ~9s pour 688 items)
+- Normalisation Unicode pour le matching des titres accentués (Yoroï ↔ Yoroi)
+- Les fichiers sont maintenant réellement supprimés du disque
+- Réécriture complète du responsive mobile
+- Toutes les chaînes françaises codées en dur remplacées par l'i18n
+- Widget de progression du scan en temps réel
+- Corrections du cache de session
 
 ---
 

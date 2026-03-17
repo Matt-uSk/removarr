@@ -14,7 +14,7 @@ import time
 import unicodedata
 import base64
 
-APP_VERSION = "1.5.1"
+APP_VERSION = "1.5.2"
 
 app = Flask(__name__)
 app.config["TEMPLATES_AUTO_RELOAD"] = True
@@ -627,11 +627,17 @@ def setup_page():
 @app.before_request
 def enforce_access():
     """Enforce IP whitelist and auth on every request except login/setup endpoints."""
-    # Always allow login, logout, setup
-    if request.path in ("/login", "/logout", "/setup"):
+    # Always allow login, logout
+    if request.path in ("/login", "/logout"):
         return None
-    if request.path.startswith("/api/setup"):
+    # Setup pages: only accessible before setup is completed
+    if request.path == "/setup" or request.path.startswith("/api/setup"):
+        if _setup_completed():
+            if request.path.startswith("/api/"):
+                return jsonify({"error": "Setup already completed"}), 403
+            return redirect(url_for("index"))
         return None
+    # Public read-only endpoints (no sensitive data)
     if request.path == "/api/config-status":
         return None
     if request.path == "/api/version":

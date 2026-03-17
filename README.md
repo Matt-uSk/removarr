@@ -197,6 +197,10 @@ Mount a volume on `/data`:
 
 ## Changelog
 
+### v1.5.2 (2026-03-17)
+- **Security**: `/api/setup/*` endpoints now locked after setup completion (prevented potential SSRF via test endpoint)
+- Security audit against Huntarr vulnerabilities checklist — all points addressed
+
 ### v1.5.1 (2026-03-16)
 - Setup wizard: favicon on all pages, test buttons on all services (TMDB/Seerr/Tautulli), TMDB warning banner
 

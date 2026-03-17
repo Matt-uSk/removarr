@@ -193,6 +193,10 @@ Monter un volume sur `/data` :
 
 ## Changelog
 
+### v1.5.2 (2026-03-17)
+- **Sécurité** : les endpoints `/api/setup/*` sont maintenant verrouillés après la configuration initiale (empêche un potentiel SSRF via l'endpoint de test)
+- Audit de sécurité réalisé contre la checklist des vulnérabilités Huntarr — tous les points adressés
+
 ### v1.5.1 (2026-03-16)
 - Assistant de configuration : favicon sur toutes les pages, boutons test sur tous les services, avertissement TMDB
 

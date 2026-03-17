@@ -1,6 +1,14 @@
 # Removarr
 
-**Removarr** est une interface web auto-hébergée pour nettoyer votre bibliothèque média — supprimer films et séries de Radarr/Sonarr, retirer tous les torrents associés de qBittorrent (cross-seeds inclus), et libérer l'espace disque. Le tout en un clic.
+<p align="center">
+  <img src="assets/banner.svg" alt="Removarr" width="600">
+</p>
+
+<p align="center">
+  <b>Nettoyez votre bibliothèque média — un clic pour supprimer films, séries, torrents et fichiers.</b>
+</p>
+
+---
 
 > [!IMPORTANT]
 > Ce projet a été développé majoritairement par **développement assisté par IA** (vibe-codé avec Claude / Anthropic). C'est un outil personnel de homelab, pas un produit.

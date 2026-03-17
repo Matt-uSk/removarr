@@ -1,6 +1,14 @@
 # Removarr
 
-**Removarr** is a self-hosted web UI to clean up your media library — delete movies and series from Radarr/Sonarr, remove all associated torrents from qBittorrent (including cross-seeds), and free up disk space. All from a single click.
+<p align="center">
+  <img src="assets/banner.svg" alt="Removarr" width="600">
+</p>
+
+<p align="center">
+  <b>Clean up your media library — one click to delete movies, series, torrents, and files.</b>
+</p>
+
+---
 
 > [!IMPORTANT]
 > This project was built primarily using **AI-assisted development** (vibe-coded with Claude by Anthropic). It is a personal homelab tool, not a product.

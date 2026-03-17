@@ -54,7 +54,7 @@
 
 ```bash
 # 1. Clone
-git clone https://github.com/Matt17000/removarr.git
+git clone https://github.com/Matt-uSk/removarr.git
 cd removarr
 
 # 2. Start

@@ -193,34 +193,7 @@ Monter un volume sur `/data` :
 
 ## Changelog
 
-### v1.5.2 (2026-03-17)
-- **Sécurité** : les endpoints `/api/setup/*` sont maintenant verrouillés après la configuration initiale (empêche un potentiel SSRF via l'endpoint de test)
-- Audit de sécurité réalisé contre la checklist des vulnérabilités Huntarr — tous les points adressés
-
-### v1.5.1 (2026-03-16)
-- Assistant de configuration : favicon sur toutes les pages, boutons test sur tous les services, avertissement TMDB
-
-### v1.5.0 (2026-03-16)
-- Clés API chiffrées au repos (Fernet/AES-128-CBC)
-- Rétrocompatible avec les anciens settings en clair
-
-### v1.4.0 (2026-03-15)
-- Assistant de configuration au premier lancement (3 étapes)
-- Identifiant/mot de passe configurables depuis l'interface
-- Bouton œil sur tous les champs sensibles
-- Page de connexion avec identifiant + mot de passe
-- Filtre "Masquer sans torrent"
-- Header/toolbar sticky restaurés
-
-### v1.3.1 (2026-03-15)
-- Cache TMDB chargé au démarrage (688 appels HTTP économisés)
-- Index inversé pour le matching torrents (~2.5 min → ~9s pour 688 items)
-- Normalisation Unicode pour le matching des titres accentués (Yoroï ↔ Yoroi)
-- Les fichiers sont maintenant réellement supprimés du disque
-- Réécriture complète du responsive mobile
-- Toutes les chaînes françaises codées en dur remplacées par l'i18n
-- Widget de progression du scan en temps réel
-- Corrections du cache de session
+Voir [CHANGELOG.md](CHANGELOG.md) pour l'historique complet des versions.
 
 ---
 

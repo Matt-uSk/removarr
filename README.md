@@ -197,34 +197,7 @@ Mount a volume on `/data`:
 
 ## Changelog
 
-### v1.5.2 (2026-03-17)
-- **Security**: `/api/setup/*` endpoints now locked after setup completion (prevented potential SSRF via test endpoint)
-- Security audit against Huntarr vulnerabilities checklist — all points addressed
-
-### v1.5.1 (2026-03-16)
-- Setup wizard: favicon on all pages, test buttons on all services (TMDB/Seerr/Tautulli), TMDB warning banner
-
-### v1.5.0 (2026-03-16)
-- API keys encrypted at rest (Fernet/AES-128-CBC)
-- Backward compatible with legacy plain-text settings
-
-### v1.4.0 (2026-03-15)
-- Setup wizard on first launch (3-step guided configuration)
-- Username/password configurable from Settings UI
-- Eye toggle on all sensitive fields
-- Login page with username + password
-- "Hide no torrent" filter
-- Sticky header/toolbar restored
-
-### v1.3.1 (2026-03-15)
-- TMDB cache loaded at startup (was never called — 688 HTTP calls saved)
-- Inverted word index for torrent matching (~2.5 min → ~9s for 688 items)
-- Unicode normalization for accented title matching (Yoroï ↔ Yoroi)
-- Files now actually deleted from disk on cascade delete
-- Complete mobile responsive rewrite
-- All hardcoded French strings replaced with i18n
-- Scan progress widget with real-time updates
-- Session cache fixes (no more ghost entries after delete)
+See [CHANGELOG.md](CHANGELOG.md) for full version history.
 
 ---
 

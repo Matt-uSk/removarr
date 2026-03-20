@@ -1531,6 +1531,8 @@
     <option value="torrents-asc" data-i18n="sort_torrents_asc"></option>
     <option value="watched-asc" data-i18n="sort_watched_asc"></option>
     <option value="watched-desc" data-i18n="sort_watched_desc"></option>
+    <option value="added-desc" data-i18n="sort_added_desc"></option>
+    <option value="added-asc" data-i18n="sort_added_asc"></option>
   </select>
 
   <!-- Watch filter (visible only when Tautulli configured) -->
@@ -2117,6 +2119,8 @@ function getFiltered() {
       case 'torrents-asc': return (a.torrent_count||0) - (b.torrent_count||0);
       case 'watched-asc':  return (a.last_watched||0) - (b.last_watched||0);   // oldest first
       case 'watched-desc': return (b.last_watched||0) - (a.last_watched||0);   // newest first
+      case 'added-desc':   return (b.added||'').localeCompare(a.added||'');     // newest first
+      case 'added-asc':    return (a.added||'').localeCompare(b.added||'');     // oldest first
     }
     return 0;
   });

@@ -14,7 +14,7 @@ import time
 import unicodedata
 import base64
 
-APP_VERSION = "1.5.2"
+APP_VERSION = "1.5.3"
 
 app = Flask(__name__)
 app.config["TEMPLATES_AUTO_RELOAD"] = True
@@ -970,6 +970,7 @@ def get_media():
             "id": mid, "type": "movie",
             "title": m["title"], "year": m.get("year"),
             "size": m.get("sizeOnDisk", 0),
+            "added": m.get("added", ""),
             "poster": f"/api/poster/movie/{mid}" if poster_cached("movie", mid) else None,
             "genres": m.get("genres", []),
             "tmdb_id": m.get("tmdbId"),
@@ -987,6 +988,7 @@ def get_media():
             "id": sid, "type": "series",
             "title": s["title"], "year": s.get("year"),
             "size": s.get("statistics", {}).get("sizeOnDisk", 0),
+            "added": s.get("added", ""),
             "poster": f"/api/poster/series/{sid}" if poster_cached("series", sid) else None,
             "genres": s.get("genres", []),
             "tvdb_id": s.get("tvdbId"),

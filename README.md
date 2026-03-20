@@ -14,7 +14,7 @@
 > This project was built primarily using **AI-assisted development** (vibe-coded with Claude by Anthropic). It is a personal homelab tool, not a product.
 
 > [!WARNING]
-> **Only basic security audit** has been performed — **do NOT expose this to the internet.** Local network use only.
+> **No security audit** has been performed — **do NOT expose this to the internet.** Local network use only.
 
 > [!CAUTION]
 > Provided **as-is**, no warranty, no support, no feature requests. Use at your own risk and responsibility. There are probably bugs — I do my best.

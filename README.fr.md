@@ -14,7 +14,7 @@
 > Ce projet a été développé majoritairement par **développement assisté par IA** (vibe-codé avec Claude / Anthropic). C'est un outil personnel de homelab, pas un produit.
 
 > [!WARNING]
-> **Seul un audit basique de sécurité** a été réalisé — **ne PAS exposer sur internet.** Usage réseau local uniquement.
+> **Aucun audit de sécurité** n'a été réalisé — **ne PAS exposer sur internet.** Usage réseau local uniquement.
 
 > [!CAUTION]
 > Fourni **tel quel**, sans garantie, sans support, sans demande de fonctionnalité. Utilisation à vos risques et responsabilité. Il y a probablement des bugs — je fais de mon mieux.

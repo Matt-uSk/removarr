@@ -163,5 +163,7 @@
   "toast_timeout": "Timeout — server not responding",
   "filter_no_torrent": "Hide no torrent",
   "settings_auth_placeholder": "Leave empty to disable",
-  "settings_auth_hint": "Set a password to enable the login page"
+  "settings_auth_hint": "Set a password to enable the login page",
+  "sort_added_desc": "Recently added ↓",
+  "sort_added_asc": "Oldest added ↑"
 }

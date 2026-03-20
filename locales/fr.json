@@ -163,5 +163,7 @@
   "toast_timeout": "Timeout — le serveur ne répond pas",
   "filter_no_torrent": "Masquer sans torrent",
   "settings_auth_placeholder": "Laisser vide pour désactiver",
-  "settings_auth_hint": "Définir un mot de passe pour activer la page de connexion"
+  "settings_auth_hint": "Définir un mot de passe pour activer la page de connexion",
+  "sort_added_desc": "Ajout récent ↓",
+  "sort_added_asc": "Ajout ancien ↑"
 }

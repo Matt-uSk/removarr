@@ -4,6 +4,15 @@ All notable changes to Removarr are documented here.
 
 ---
 
+## v1.5.3 (2026-03-20)
+
+**Features**
+- Sort by "Recently added" / "Oldest added" — uses the date the media was added to Radarr/Sonarr
+- Banner logo on GitHub README with centered trash icon
+
+**Fixes**
+- Trash icon properly centered in banner SVG
+
 ## v1.5.2 (2026-03-17)
 
 **Security**

@@ -1,6 +1,6 @@
 services:
   removarr:
-    build: .
+    build: https://github.com/Matt-uSk/removarr.git
     container_name: removarr
     restart: unless-stopped
     ports:

@@ -61,14 +61,9 @@
 ## Démarrage rapide
 
 ```bash
-# 1. Cloner
-git clone https://github.com/Matt-uSk/removarr.git
-cd removarr
-
-# 2. Lancer
+# Créer un docker-compose.yml et lancer
 docker compose up -d
 
-# 3. Ouvrir
 # → http://<votre-ip>:5999
 # L'assistant de configuration vous guide
 ```
@@ -84,7 +79,7 @@ C'est tout. Aucune variable d'environnement nécessaire — l'assistant s'occupe
 ```yaml
 services:
   removarr:
-    build: .
+    build: https://github.com/Matt-uSk/removarr.git
     container_name: removarr
     restart: unless-stopped
     ports:

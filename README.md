@@ -61,14 +61,9 @@
 ## Quick start
 
 ```bash
-# 1. Clone
-git clone https://github.com/Matt-uSk/removarr.git
-cd removarr
-
-# 2. Start
+# Create a docker-compose.yml and start
 docker compose up -d
 
-# 3. Open
 # → http://<your-ip>:5999
 # The setup wizard will guide you through configuration
 ```
@@ -84,7 +79,7 @@ That's it. No environment variables needed — the setup wizard handles everythi
 ```yaml
 services:
   removarr:
-    build: .
+    build: https://github.com/Matt-uSk/removarr.git
     container_name: removarr
     restart: unless-stopped
     ports:

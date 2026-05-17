@@ -165,5 +165,7 @@
   "settings_auth_placeholder": "Leave empty to disable",
   "settings_auth_hint": "Set a password to enable the login page",
   "sort_added_desc": "Recently added ↓",
-  "sort_added_asc": "Oldest added ↑"
+  "sort_added_asc": "Oldest added ↑",
+  "filter_all_libraries": "All libraries",
+  "sort_library": "Library"
 }

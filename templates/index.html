@@ -1533,6 +1533,7 @@
     <option value="watched-desc" data-i18n="sort_watched_desc"></option>
     <option value="added-desc" data-i18n="sort_added_desc"></option>
     <option value="added-asc" data-i18n="sort_added_asc"></option>
+    <option value="library" data-i18n="sort_library"></option>
   </select>
 
   <!-- Watch filter (visible only when Tautulli configured) -->
@@ -1546,6 +1547,11 @@
     <input type="checkbox" id="no-torrent-cb" onchange="toggleNoTorrentFilter(this.checked)">
     <span data-i18n="filter_no_torrent"></span>
   </label>
+
+  <!-- Library filter (visible only when Tautulli configured) -->
+  <select class="sort-select" id="library-filter" style="display:none" onchange="setLibraryFilter(this.value)">
+    <option value="all" data-i18n="filter_all_libraries"></option>
+  </select>
 
   <div class="toolbar-spacer"></div>
 
@@ -1716,6 +1722,7 @@ let searchQuery = '';
 let sortMode = 'title';
 let currentPage = 1;
 let noTorrentFilter = false;
+let libraryFilter = 'all';
 let pageSize = (() => { try { return parseInt(localStorage.getItem('removarr_pagesize')) || 50; } catch(e) { return 50; } })();
 
 // ─── Utils ────────────────────────────────────────────────────
@@ -1855,10 +1862,13 @@ async function checkStatus() {
       tautulliEnabled = true;
       _setSvc('tautulli', !!data.tautulli.ok);
       document.getElementById('watch-filter').style.display = '';
+      // Load Plex libraries for filter dropdown
+      loadLibraries();
     } else {
       tautulliEnabled = false;
       _setSvc('tautulli', false, false);
       document.getElementById('watch-filter').style.display = 'none';
+      document.getElementById('library-filter').style.display = 'none';
     }
     // Re-render grid if tautulli state changed (so badges appear without reload)
     if (wasEnabled !== tautulliEnabled && allMedia.length > 0) renderGrid();
@@ -1928,6 +1938,7 @@ async function enrichMedia(mediaList) {
           allMedia[idx].tmdb_id = allMedia[idx].tmdb_id || e.tmdb_id;
           if (e.last_watched !== undefined) allMedia[idx].last_watched = e.last_watched;
           if (e.play_count   !== undefined) allMedia[idx].play_count   = e.play_count;
+          if (e.library_name) allMedia[idx].library_name = e.library_name;
           // Update card in DOM
           const card = document.querySelector(`[data-key="${e.type}-${e.id}"]`);
           if (card && e.poster) {
@@ -2107,6 +2118,10 @@ function getFiltered() {
   if (noTorrentFilter) {
     list = list.filter(m => m.torrent_count && m.torrent_count > 0);
   }
+  // Library filter
+  if (libraryFilter !== 'all') {
+    list = list.filter(m => m.library_name === libraryFilter);
+  }
   list.sort((a, b) => {
     switch(sortMode) {
       case 'title': return a.title.localeCompare(b.title);
@@ -2121,6 +2136,7 @@ function getFiltered() {
       case 'watched-desc': return (b.last_watched||0) - (a.last_watched||0);   // newest first
       case 'added-desc':   return (b.added||'').localeCompare(a.added||'');     // newest first
       case 'added-asc':    return (a.added||'').localeCompare(b.added||'');     // oldest first
+      case 'library':      return (a.library_name||'').localeCompare(b.library_name||'');
     }
     return 0;
   });
@@ -2137,6 +2153,31 @@ function toggleNoTorrentFilter(checked) {
   noTorrentFilter = checked;
   currentPage = 1;
   renderGrid();
+}
+
+function setLibraryFilter(val) {
+  libraryFilter = val;
+  currentPage = 1;
+  renderGrid();
+}
+
+async function loadLibraries() {
+  try {
+    const r = await fetch('/api/libraries');
+    const d = await r.json();
+    const sel = document.getElementById('library-filter');
+    if (d.libraries && d.libraries.length > 0) {
+      // Keep the "all" option, remove old dynamic options
+      while (sel.options.length > 1) sel.remove(1);
+      d.libraries.forEach(name => {
+        const opt = document.createElement('option');
+        opt.value = name;
+        opt.textContent = name;
+        sel.appendChild(opt);
+      });
+      sel.style.display = '';
+    }
+  } catch(e) { /* silently ignore */ }
 }
 
 function renderPagination(total) {

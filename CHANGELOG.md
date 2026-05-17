@@ -4,6 +4,14 @@ All notable changes to Removarr are documented here.
 
 ---
 
+## v1.6.0 (2026-05-17)
+
+**Features**
+- Filter by Plex library (dropdown populated from Tautulli's library list)
+- Sort by library name
+- Library name (`library_name`) included in enrichment data via Tautulli `section_id` mapping
+- New `/api/libraries` endpoint returns available Plex library names
+
 ## v1.5.4 (2026-05-16)
 
 **Fixes**

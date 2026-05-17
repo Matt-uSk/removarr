@@ -165,5 +165,7 @@
   "settings_auth_placeholder": "Laisser vide pour désactiver",
   "settings_auth_hint": "Définir un mot de passe pour activer la page de connexion",
   "sort_added_desc": "Ajout récent ↓",
-  "sort_added_asc": "Ajout ancien ↑"
+  "sort_added_asc": "Ajout ancien ↑",
+  "filter_all_libraries": "Toutes bibliothèques",
+  "sort_library": "Bibliothèque"
 }

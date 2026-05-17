@@ -14,7 +14,7 @@ import time
 import unicodedata
 import base64
 
-APP_VERSION = "1.5.4"
+APP_VERSION = "1.6.0"
 
 app = Flask(__name__)
 app.config["TEMPLATES_AUTO_RELOAD"] = True
@@ -708,12 +708,47 @@ def get_tautulli_key():
 def tautulli_configured():
     return bool(get_tautulli_url() and get_tautulli_key())
 
+def fetch_tautulli_libraries():
+    """Fetch Plex library sections from Tautulli. Returns dict {section_id: section_name}."""
+    if not tautulli_configured():
+        return {}
+    try:
+        r = requests.get(get_tautulli_url() + "/api/v2",
+                         params={"apikey": get_tautulli_key(), "cmd": "get_libraries"}, timeout=10)
+        data = r.json().get("response", {}).get("data", [])
+        libs = {}
+        for lib in data:
+            sid = str(lib.get("section_id", ""))
+            name = lib.get("section_name", "")
+            if sid and name:
+                libs[sid] = name
+        logger.info(f"Tautulli: loaded {len(libs)} libraries: {', '.join(libs.values())}")
+        return libs
+    except Exception as e:
+        logger.warning(f"Tautulli libraries fetch failed: {e}")
+        return {}
+
+# Module-level cache for libraries
+_tautulli_libs = {}
+_tautulli_libs_ts = 0
+
+def get_tautulli_libraries_cached():
+    global _tautulli_libs, _tautulli_libs_ts
+    if not tautulli_configured():
+        return {}
+    now = time.time()
+    if now - _tautulli_libs_ts > TAUTULLI_CACHE_TTL:
+        _tautulli_libs = fetch_tautulli_libraries()
+        _tautulli_libs_ts = now
+    return _tautulli_libs
+
 def fetch_tautulli_history():
-    """Fetch full watch history from Tautulli. Returns dict keyed by (title_lower, year) -> {last_watched, play_count}."""
+    """Fetch full watch history from Tautulli. Returns dict keyed by title_lower -> {last_watched, play_count, library_name}."""
     if not tautulli_configured():
         return {}
     try:
         url = get_tautulli_url() + "/api/v2"
+        libs = get_tautulli_libraries_cached()
         # Fetch up to 10000 records to cover full library
         params = {
             "apikey": get_tautulli_key(),
@@ -733,13 +768,18 @@ def fetch_tautulli_history():
                 title = (rec.get("grandparent_title") or rec.get("title") or "").lower().strip()
             year = rec.get("year") or rec.get("grandparent_year")
             watched_at = rec.get("date") or rec.get("started")  # unix timestamp
+            section_id = str(rec.get("section_id", ""))
+            library_name = libs.get(section_id, "")
 
             key = title
             if key not in history:
-                history[key] = {"last_watched": watched_at, "play_count": 0}
+                history[key] = {"last_watched": watched_at, "play_count": 0, "library_name": library_name}
             history[key]["play_count"] += 1
             if watched_at and watched_at > history[key].get("last_watched", 0):
                 history[key]["last_watched"] = watched_at
+            # Keep first library_name found (most relevant)
+            if library_name and not history[key].get("library_name"):
+                history[key]["library_name"] = library_name
 
         logger.info(f"Tautulli: loaded history for {len(history)} titles")
         return history
@@ -922,6 +962,13 @@ def get_version():
     return jsonify({"version": APP_VERSION})
 
 
+@app.route("/api/libraries")
+def get_libraries():
+    """Return list of Plex library names from Tautulli."""
+    libs = get_tautulli_libraries_cached()
+    return jsonify({"libraries": sorted(set(libs.values()))})
+
+
 @app.route("/api/locales")
 def list_locales():
     """List available locale files."""
@@ -1080,6 +1127,7 @@ def enrich_media():
             "torrent_hashes": [t["hash"] for t in torrents],
             "last_watched":   watch_info["last_watched"] if watch_info else None,
             "play_count":     watch_info["play_count"] if watch_info else 0,
+            "library_name":   watch_info.get("library_name", "") if watch_info else "",
         })
 
     total = time.time() - t0

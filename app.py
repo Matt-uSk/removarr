@@ -14,7 +14,7 @@ import time
 import unicodedata
 import base64
 
-APP_VERSION = "1.6.0"
+APP_VERSION = "1.6.2"
 
 app = Flask(__name__)
 app.config["TEMPLATES_AUTO_RELOAD"] = True

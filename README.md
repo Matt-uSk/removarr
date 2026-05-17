@@ -14,7 +14,7 @@
 > This project was built primarily using **AI-assisted development** (vibe-coded with Claude by Anthropic). It is a personal homelab tool, not a product.
 
 > [!WARNING]
-> **No security audit** has been performed — **do NOT expose this to the internet.** Local network use only.
+> A basic security review has been performed (Huntarr vulnerability checklist), but **no formal security audit** has been conducted. **Do NOT expose this to the internet** — local network use only.
 
 > [!CAUTION]
 > Provided **as-is**, no warranty, no support, no feature requests. Use at your own risk and responsibility. There are probably bugs — I do my best.
@@ -32,7 +32,8 @@
 
 ### Integrations
 - **Radarr** / **Sonarr** — library management + file deletion
-- **qBittorrent** — torrent + file deletion
+- **qBittorrent** — torrent + file deletion (compatible with v5.2.0+)
+- **Plex** — library filter and sort (connect with your Plex token)
 - **TMDB** — HD posters + alternate title matching
 - **Seerr / Overseerr** — automatic request cleanup on delete
 - **Tautulli** — watch history badges (never watched, last watched, play count)
@@ -44,7 +45,7 @@
 
 ### UI/UX
 - Setup wizard on first launch (no config files needed)
-- Search, filters (Movies / Series / Hide no torrent / Never watched), multi-criteria sort
+- Search, filters (Movies / Series / Plex library / Hide no torrent / Never watched), multi-criteria sort (title, size, year, torrents, watch date, added date, library)
 - Multilingual (FR / EN + extensible), auto-detects browser language
 - Mobile responsive
 - Service status indicators with live connectivity checks
@@ -52,9 +53,11 @@
 ### Security
 - **Setup wizard** creates admin account on first launch
 - Username + password configurable from Settings (stored as SHA-256 hash)
-- All API keys **encrypted at rest** (Fernet/AES-128-CBC) in `settings.json`
+- All API keys and tokens **encrypted at rest** (Fernet/AES-128-CBC) in `settings.json`
 - IP whitelist (CIDR support)
 - All sensitive fields masked with eye toggle in the UI
+- Setup endpoints locked after initial configuration (prevents SSRF)
+- Basic security review performed against known *arr stack vulnerabilities
 
 ---
 
@@ -101,8 +104,16 @@ volumes:
 2. The setup wizard appears with 3 steps:
    - **Step 1** — Create admin account (username + password)
    - **Step 2** — Configure Radarr, Sonarr, qBittorrent (with live connection test)
-   - **Step 3** — Optional services: TMDB (posters), Seerr (requests), Tautulli (watch history)
+   - **Step 3** — Optional services: TMDB (posters), Seerr (requests), Tautulli (watch history), Plex (library filter)
 3. Done — you're logged in and the library loads
+
+### Update
+
+```bash
+docker compose down && docker compose build --no-cache && docker compose up -d
+```
+
+Your settings, cache, and posters are in the `/data` volume — nothing is lost on rebuild.
 
 ### Advanced: environment variables
 
@@ -116,6 +127,7 @@ All settings can also be passed as env vars (useful for automation). The setup w
 | `TMDB_API_KEY` | TMDB API key or Bearer v4 token |
 | `SEERR_URL` / `SEERR_API_KEY` | Seerr/Overseerr connection |
 | `TAUTULLI_URL` / `TAUTULLI_API_KEY` | Tautulli connection |
+| `PLEX_URL` / `PLEX_TOKEN` | Plex connection (for library filter) |
 | `REMOVARR_PASSWORD` | Login password (fallback if not set via UI) |
 | `REMOVARR_ALLOWED_IPS` | IP whitelist, e.g. `192.168.0.0/24,10.0.0.1` |
 | `SECRET_KEY` | Encryption + session key |
@@ -130,22 +142,32 @@ All settings can also be passed as env vars (useful for automation). The setup w
 | Data | Method | Reversible |
 |---|---|---|
 | Removarr password | SHA-256 hash | No (compare only) |
-| API keys & service passwords | Fernet encryption (AES-128-CBC) | Yes (decrypted at runtime) |
+| API keys, tokens & service passwords | Fernet encryption (AES-128-CBC) | Yes (decrypted at runtime) |
 
 All sensitive data in `/data/settings.json` is either hashed or encrypted. Nothing is stored in plain text.
 
 The encryption key is derived from `SECRET_KEY`. If you change or lose it, re-enter your API keys in Settings.
 
-### Authentication
+### Security measures
 
-Configured during setup or in Settings → 🔒 Security:
-- **Username** (default: `admin`)
-- **Password** (leave empty to disable auth)
-- **IP whitelist** (CIDR ranges, comma-separated)
+- Authentication with username/password (configurable in setup wizard or Settings)
+- IP whitelist support (CIDR ranges)
+- All sensitive fields masked in the UI with eye toggle
+- Settings API never returns actual values — only `••••••••` placeholders
+- Setup endpoints (`/api/setup/*`) locked after initial configuration to prevent abuse
+- Basic review performed against the [Huntarr security vulnerability checklist](https://github.com/rfsbraz/huntarr-security-review)
 
-### All sensitive fields in the UI
+---
 
-Every API key and password field uses `type="password"` with an eye toggle to show/hide. The Settings page never returns actual values — only `••••••••` placeholders.
+## Plex integration
+
+Connect Plex with your `X-Plex-Token` to enable:
+- **Library filter** — dropdown to filter media by Plex library (e.g. "Films 4K", "Séries", "Anime")
+- **Library sort** — sort your media by library name
+
+To find your Plex token: [Plex support article](https://support.plex.tv/articles/204059436-finding-an-authentication-token-x-plex-token/)
+
+Configure in the setup wizard (step 3) or in Settings → Plex.
 
 ---
 
@@ -188,8 +210,9 @@ Mount a volume on `/data`:
 | `/api/version` | GET | `{"version": "x.y.z"}` |
 | `/api/status` | GET | Service connectivity |
 | `/api/config-status` | GET | Setup state |
+| `/api/libraries` | GET | Plex library names |
 | `/api/media` | GET | Full library from Radarr/Sonarr |
-| `/api/media/enrich` | POST | Batch enrichment (posters, torrents, Tautulli) |
+| `/api/media/enrich` | POST | Batch enrichment (posters, torrents, Tautulli, Plex) |
 | `/api/delete` | POST | Cascade delete (media + torrents + files) |
 | `/api/settings` | GET/POST | Read/write configuration |
 | `/api/setup` | POST | Initial setup (first launch only) |

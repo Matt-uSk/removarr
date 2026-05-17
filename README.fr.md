@@ -14,7 +14,7 @@
 > Ce projet a été développé majoritairement par **développement assisté par IA** (vibe-codé avec Claude / Anthropic). C'est un outil personnel de homelab, pas un produit.
 
 > [!WARNING]
-> **Aucun audit de sécurité** n'a été réalisé — **ne PAS exposer sur internet.** Usage réseau local uniquement.
+> Une revue de sécurité basique a été réalisée (checklist des vulnérabilités Huntarr), mais **aucun audit de sécurité formel** n'a été conduit. **Ne PAS exposer sur internet** — usage réseau local uniquement.
 
 > [!CAUTION]
 > Fourni **tel quel**, sans garantie, sans support, sans demande de fonctionnalité. Utilisation à vos risques et responsabilité. Il y a probablement des bugs — je fais de mon mieux.
@@ -32,7 +32,8 @@
 
 ### Intégrations
 - **Radarr** / **Sonarr** — gestion de la bibliothèque + suppression des fichiers
-- **qBittorrent** — suppression des torrents + fichiers
+- **qBittorrent** — suppression des torrents + fichiers (compatible v5.2.0+)
+- **Plex** — filtre et tri par bibliothèque (connexion via token Plex)
 - **TMDB** — posters HD + matching des titres alternatifs
 - **Seerr / Overseerr** — nettoyage automatique des demandes à la suppression
 - **Tautulli** — badges d'historique de lecture (jamais vu, dernier visionnage, nombre de lectures)
@@ -44,7 +45,7 @@
 
 ### Interface
 - Assistant de configuration au premier lancement (aucun fichier de config nécessaire)
-- Recherche, filtres (Films / Séries / Masquer sans torrent / Jamais vu), tri multi-critères
+- Recherche, filtres (Films / Séries / Bibliothèque Plex / Masquer sans torrent / Jamais vu), tri multi-critères (titre, taille, année, torrents, date de visionnage, date d'ajout, bibliothèque)
 - Multilingue (FR / EN + extensible), détection automatique du navigateur
 - Responsive mobile
 - Indicateurs de statut des services avec vérification de connectivité
@@ -52,9 +53,11 @@
 ### Sécurité
 - **Assistant de configuration** crée le compte admin au premier lancement
 - Identifiant + mot de passe configurables depuis les Réglages (stocké en hash SHA-256)
-- Toutes les clés API **chiffrées au repos** (Fernet/AES-128-CBC) dans `settings.json`
+- Toutes les clés API et tokens **chiffrés au repos** (Fernet/AES-128-CBC) dans `settings.json`
 - Whitelist IP (support CIDR)
 - Tous les champs sensibles masqués avec bouton œil dans l'interface
+- Endpoints de setup verrouillés après la configuration initiale (empêche le SSRF)
+- Revue de sécurité basique réalisée contre les vulnérabilités connues des stacks *arr
 
 ---
 
@@ -101,8 +104,16 @@ volumes:
 2. L'assistant de configuration apparaît en 3 étapes :
    - **Étape 1** — Créer le compte admin (identifiant + mot de passe)
    - **Étape 2** — Configurer Radarr, Sonarr, qBittorrent (avec test de connexion)
-   - **Étape 3** — Services optionnels : TMDB (posters), Seerr (demandes), Tautulli (historique)
+   - **Étape 3** — Services optionnels : TMDB (posters), Seerr (demandes), Tautulli (historique), Plex (filtre par bibliothèque)
 3. Terminé — vous êtes connecté et la bibliothèque se charge
+
+### Mise à jour
+
+```bash
+docker compose down && docker compose build --no-cache && docker compose up -d
+```
+
+Vos réglages, cache et posters sont dans le volume `/data` — rien ne se perd au rebuild.
 
 ### Avancé : variables d'environnement
 
@@ -116,6 +127,7 @@ Tous les réglages peuvent aussi être passés en variables d'environnement (uti
 | `TMDB_API_KEY` | Clé API TMDB ou Bearer Token v4 |
 | `SEERR_URL` / `SEERR_API_KEY` | Connexion Seerr/Overseerr |
 | `TAUTULLI_URL` / `TAUTULLI_API_KEY` | Connexion Tautulli |
+| `PLEX_URL` / `PLEX_TOKEN` | Connexion Plex (pour filtre par bibliothèque) |
 | `REMOVARR_PASSWORD` | Mot de passe (fallback si non configuré via l'UI) |
 | `REMOVARR_ALLOWED_IPS` | Whitelist IP, ex : `192.168.0.0/24,10.0.0.1` |
 | `SECRET_KEY` | Clé de chiffrement + sessions |
@@ -130,18 +142,32 @@ Tous les réglages peuvent aussi être passés en variables d'environnement (uti
 | Donnée | Méthode | Réversible |
 |---|---|---|
 | Mot de passe Removarr | Hash SHA-256 | Non (comparaison uniquement) |
-| Clés API et mots de passe services | Chiffrement Fernet (AES-128-CBC) | Oui (déchiffré à l'exécution) |
+| Clés API, tokens et mots de passe services | Chiffrement Fernet (AES-128-CBC) | Oui (déchiffré à l'exécution) |
 
 Toutes les données sensibles dans `/data/settings.json` sont hashées ou chiffrées. Rien n'est stocké en clair.
 
 La clé de chiffrement est dérivée de `SECRET_KEY`. Si vous la changez ou la perdez, re-saisissez vos clés API dans les Réglages.
 
-### Authentification
+### Mesures de sécurité
 
-Configurée pendant le setup ou dans Réglages → 🔒 Sécurité :
-- **Identifiant** (défaut : `admin`)
-- **Mot de passe** (laisser vide pour désactiver l'auth)
-- **Whitelist IP** (plages CIDR, séparées par virgule)
+- Authentification par identifiant/mot de passe (configurable dans l'assistant ou les Réglages)
+- Whitelist IP (plages CIDR)
+- Tous les champs sensibles masqués avec bouton œil
+- L'API Settings ne retourne jamais les valeurs réelles — uniquement des `••••••••`
+- Les endpoints de setup (`/api/setup/*`) sont verrouillés après la configuration initiale
+- Revue basique réalisée contre la [checklist de sécurité Huntarr](https://github.com/rfsbraz/huntarr-security-review)
+
+---
+
+## Intégration Plex
+
+Connectez Plex avec votre `X-Plex-Token` pour activer :
+- **Filtre par bibliothèque** — dropdown pour filtrer par bibliothèque Plex (ex : "Films 4K", "Séries", "Anime")
+- **Tri par bibliothèque** — ordonner vos médias par nom de bibliothèque
+
+Pour trouver votre token Plex : [article de support Plex](https://support.plex.tv/articles/204059436-finding-an-authentication-token-x-plex-token/)
+
+Configurable dans l'assistant (étape 3) ou dans Réglages → Plex.
 
 ---
 
@@ -184,8 +210,9 @@ Monter un volume sur `/data` :
 | `/api/version` | GET | `{"version": "x.y.z"}` |
 | `/api/status` | GET | Connectivité des services |
 | `/api/config-status` | GET | État du setup |
+| `/api/libraries` | GET | Noms des bibliothèques Plex |
 | `/api/media` | GET | Bibliothèque complète Radarr/Sonarr |
-| `/api/media/enrich` | POST | Enrichissement par batch (posters, torrents, Tautulli) |
+| `/api/media/enrich` | POST | Enrichissement par batch (posters, torrents, Tautulli, Plex) |
 | `/api/delete` | POST | Suppression en cascade (média + torrents + fichiers) |
 | `/api/settings` | GET/POST | Lecture/écriture de la configuration |
 | `/api/setup` | POST | Configuration initiale (premier lancement uniquement) |

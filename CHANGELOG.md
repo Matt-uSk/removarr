@@ -7,10 +7,15 @@ All notable changes to Removarr are documented here.
 ## v1.6.0 (2026-05-17)
 
 **Features**
-- Filter by Plex library (dropdown populated from Tautulli's library list)
+- **Plex integration**: connect directly with your Plex token to get library names for every media
+- Filter by Plex library (dropdown populated from Plex `/library/sections` API)
 - Sort by library name
-- Library name (`library_name`) included in enrichment data via Tautulli `section_id` mapping
+- Plex service: configurable in setup wizard and settings page, with connection test
+- Plex token encrypted at rest like all other API keys
 - New `/api/libraries` endpoint returns available Plex library names
+
+**Changes**
+- Library mapping now uses Plex API directly (replaces Tautulli-based approach which only covered watched titles)
 
 ## v1.5.4 (2026-05-16)
 

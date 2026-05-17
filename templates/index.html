@@ -1868,6 +1868,13 @@ async function checkStatus() {
       tautulliEnabled = false;
       _setSvc('tautulli', false, false);
       document.getElementById('watch-filter').style.display = 'none';
+    }
+    // Plex
+    if (data.plex?.configured) {
+      _setSvc('plex', !!data.plex.ok);
+      loadLibraries();
+    } else {
+      _setSvc('plex', false, false);
       document.getElementById('library-filter').style.display = 'none';
     }
     // Re-render grid if tautulli state changed (so badges appear without reload)

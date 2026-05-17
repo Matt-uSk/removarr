@@ -576,6 +576,33 @@
       </div>
     </div>
 
+    <div class="setup-card">
+      <div class="setup-card-header">
+        <span class="icon">🎬</span> Plex
+        <span class="badge">bibliothèques</span>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>URL</label>
+          <input type="text" id="s-plex-url" placeholder="http://192.168.0.x:32400">
+        </div>
+        <div class="field">
+          <label>Token</label>
+          <div class="secret-wrap">
+            <input type="password" id="s-plex-token" placeholder="Token Plex">
+            <button type="button" class="toggle-eye" onclick="toggleEye('s-plex-token', this)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+          <div class="field-hint">Voir <a href="https://support.plex.tv/articles/204059436-finding-an-authentication-token-x-plex-token/" target="_blank" style="color:var(--accent)">comment trouver votre token</a></div>
+        </div>
+      </div>
+      <div class="test-inline">
+        <button class="test-btn" onclick="testSetup('plex')">Tester</button>
+        <span class="test-result" id="tr-plex"></span>
+      </div>
+    </div>
+
     <div class="wizard-nav">
       <button class="btn-back" onclick="goStep(2)">← Retour</button>
       <button class="btn-skip" onclick="finishSetup()" style="margin-right:8px">Passer</button>
@@ -667,6 +694,9 @@ async function testSetup(service) {
   } else if (service === 'tautulli') {
     payload.url = document.getElementById('s-tautulli-url').value;
     payload.api_key = document.getElementById('s-tautulli-key').value;
+  } else if (service === 'plex') {
+    payload.url = document.getElementById('s-plex-url').value;
+    payload.token = document.getElementById('s-plex-token').value;
   }
 
   try {
@@ -710,6 +740,8 @@ async function finishSetup() {
     seerr_api_key:  document.getElementById('s-seerr-key').value,
     tautulli_url:   document.getElementById('s-tautulli-url').value,
     tautulli_api_key: document.getElementById('s-tautulli-key').value,
+    plex_url:       document.getElementById('s-plex-url').value,
+    plex_token:     document.getElementById('s-plex-token').value,
   };
 
   try {

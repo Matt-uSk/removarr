@@ -34,7 +34,7 @@ _fernet = Fernet(_fernet_key)
 # Fields that are encrypted at rest in settings.json
 ENCRYPTED_FIELDS = {
     "radarr_api_key", "sonarr_api_key", "qbit_password",
-    "tmdb_api_key", "seerr_api_key", "tautulli_api_key",
+    "tmdb_api_key", "seerr_api_key", "tautulli_api_key", "plex_token",
 }
 
 def _encrypt(value):
@@ -708,47 +708,12 @@ def get_tautulli_key():
 def tautulli_configured():
     return bool(get_tautulli_url() and get_tautulli_key())
 
-def fetch_tautulli_libraries():
-    """Fetch Plex library sections from Tautulli. Returns dict {section_id: section_name}."""
-    if not tautulli_configured():
-        return {}
-    try:
-        r = requests.get(get_tautulli_url() + "/api/v2",
-                         params={"apikey": get_tautulli_key(), "cmd": "get_libraries"}, timeout=10)
-        data = r.json().get("response", {}).get("data", [])
-        libs = {}
-        for lib in data:
-            sid = str(lib.get("section_id", ""))
-            name = lib.get("section_name", "")
-            if sid and name:
-                libs[sid] = name
-        logger.info(f"Tautulli: loaded {len(libs)} libraries: {', '.join(libs.values())}")
-        return libs
-    except Exception as e:
-        logger.warning(f"Tautulli libraries fetch failed: {e}")
-        return {}
-
-# Module-level cache for libraries
-_tautulli_libs = {}
-_tautulli_libs_ts = 0
-
-def get_tautulli_libraries_cached():
-    global _tautulli_libs, _tautulli_libs_ts
-    if not tautulli_configured():
-        return {}
-    now = time.time()
-    if now - _tautulli_libs_ts > TAUTULLI_CACHE_TTL:
-        _tautulli_libs = fetch_tautulli_libraries()
-        _tautulli_libs_ts = now
-    return _tautulli_libs
-
 def fetch_tautulli_history():
-    """Fetch full watch history from Tautulli. Returns dict keyed by title_lower -> {last_watched, play_count, library_name}."""
+    """Fetch full watch history from Tautulli. Returns dict keyed by title_lower -> {last_watched, play_count}."""
     if not tautulli_configured():
         return {}
     try:
         url = get_tautulli_url() + "/api/v2"
-        libs = get_tautulli_libraries_cached()
         # Fetch up to 10000 records to cover full library
         params = {
             "apikey": get_tautulli_key(),
@@ -768,24 +733,103 @@ def fetch_tautulli_history():
                 title = (rec.get("grandparent_title") or rec.get("title") or "").lower().strip()
             year = rec.get("year") or rec.get("grandparent_year")
             watched_at = rec.get("date") or rec.get("started")  # unix timestamp
-            section_id = str(rec.get("section_id", ""))
-            library_name = libs.get(section_id, "")
 
             key = title
             if key not in history:
-                history[key] = {"last_watched": watched_at, "play_count": 0, "library_name": library_name}
+                history[key] = {"last_watched": watched_at, "play_count": 0}
             history[key]["play_count"] += 1
             if watched_at and watched_at > history[key].get("last_watched", 0):
                 history[key]["last_watched"] = watched_at
-            # Keep first library_name found (most relevant)
-            if library_name and not history[key].get("library_name"):
-                history[key]["library_name"] = library_name
 
         logger.info(f"Tautulli: loaded history for {len(history)} titles")
         return history
     except Exception as e:
         logger.warning(f"Tautulli history fetch failed: {e}")
         return {}
+
+
+# ─── Plex integration (library mapping) ──────────────────────────────────────
+
+def get_plex_url():
+    return _cfg("plex_url", "PLEX_URL", "").rstrip("/")
+
+def get_plex_token():
+    return _cfg("plex_token", "PLEX_TOKEN", "")
+
+def plex_configured():
+    return bool(get_plex_url() and get_plex_token())
+
+def _plex_headers():
+    return {"X-Plex-Token": get_plex_token(), "Accept": "application/json"}
+
+def fetch_plex_libraries():
+    """Fetch Plex library sections. Returns dict {section_id: section_name}."""
+    if not plex_configured():
+        return {}
+    try:
+        r = requests.get(f"{get_plex_url()}/library/sections",
+                         headers=_plex_headers(), timeout=10)
+        data = r.json().get("MediaContainer", {}).get("Directory", [])
+        libs = {}
+        for lib in data:
+            key = str(lib.get("key", ""))
+            title = lib.get("title", "")
+            lib_type = lib.get("type", "")
+            if key and title and lib_type in ("movie", "show"):
+                libs[key] = title
+        logger.info(f"Plex: loaded {len(libs)} libraries: {', '.join(libs.values())}")
+        return libs
+    except Exception as e:
+        logger.warning(f"Plex libraries fetch failed: {e}")
+        return {}
+
+def fetch_plex_library_media(section_id):
+    """Fetch all media titles from a Plex library section. Returns list of {title, year}."""
+    if not plex_configured():
+        return []
+    try:
+        r = requests.get(f"{get_plex_url()}/library/sections/{section_id}/all",
+                         headers=_plex_headers(), timeout=30)
+        data = r.json().get("MediaContainer", {}).get("Metadata", [])
+        return [{"title": m.get("title", "").lower().strip(), "year": m.get("year")} for m in data]
+    except Exception as e:
+        logger.warning(f"Plex library {section_id} fetch failed: {e}")
+        return []
+
+# Cache for Plex library mapping: title_lower -> library_name
+_plex_lib_map = {}
+_plex_lib_map_ts = 0
+_plex_libs = {}
+_plex_libs_ts = 0
+PLEX_CACHE_TTL = 600  # 10 minutes
+
+def get_plex_libraries_cached():
+    global _plex_libs, _plex_libs_ts
+    if not plex_configured():
+        return {}
+    now = time.time()
+    if now - _plex_libs_ts > PLEX_CACHE_TTL:
+        _plex_libs = fetch_plex_libraries()
+        _plex_libs_ts = now
+    return _plex_libs
+
+def get_plex_library_map_cached():
+    """Returns dict {title_lower: library_name} for all media across all Plex libraries."""
+    global _plex_lib_map, _plex_lib_map_ts
+    if not plex_configured():
+        return {}
+    now = time.time()
+    if now - _plex_lib_map_ts > PLEX_CACHE_TTL:
+        libs = get_plex_libraries_cached()
+        mapping = {}
+        for section_id, lib_name in libs.items():
+            media_list = fetch_plex_library_media(section_id)
+            for m in media_list:
+                mapping[m["title"]] = lib_name
+        _plex_lib_map = mapping
+        _plex_lib_map_ts = now
+        logger.info(f"Plex: mapped {len(mapping)} titles to libraries")
+    return _plex_lib_map
 
 # Module-level cache for Tautulli history (refreshed with media enrichment)
 _tautulli_cache = {}
@@ -840,6 +884,16 @@ def status():
             results["tautulli"] = {"ok": False, "configured": True}
     else:
         results["tautulli"] = {"ok": False, "configured": False}
+    # Plex
+    if plex_configured():
+        try:
+            r = requests.get(f"{get_plex_url()}/identity",
+                             headers=_plex_headers(), timeout=5)
+            results["plex"] = {"ok": r.status_code == 200, "configured": True}
+        except:
+            results["plex"] = {"ok": False, "configured": True}
+    else:
+        results["plex"] = {"ok": False, "configured": False}
     return jsonify(results)
 
 
@@ -881,7 +935,8 @@ def run_setup():
     for key in ["radarr_url", "radarr_api_key", "sonarr_url", "sonarr_api_key",
                 "qbit_url", "qbit_username", "qbit_password",
                 "tmdb_api_key", "seerr_url", "seerr_api_key",
-                "tautulli_url", "tautulli_api_key"]:
+                "tautulli_url", "tautulli_api_key",
+                "plex_url", "plex_token"]:
         val = data.get(key, "").strip()
         if val:
             if key in ENCRYPTED_FIELDS:
@@ -947,6 +1002,12 @@ def setup_test_service():
             r = requests.get(f"{url}/api/v2",
                              params={"apikey": key, "cmd": "get_server_info"}, timeout=5)
             return jsonify({"ok": r.status_code == 200})
+        elif service == "plex":
+            url = data.get("url", "").rstrip("/")
+            token = data.get("token", "")
+            r = requests.get(f"{url}/identity",
+                             headers={"X-Plex-Token": token, "Accept": "application/json"}, timeout=5)
+            return jsonify({"ok": r.status_code == 200})
         else:
             return jsonify({"ok": False, "error": "Unknown service"})
     except requests.exceptions.ConnectionError:
@@ -964,8 +1025,8 @@ def get_version():
 
 @app.route("/api/libraries")
 def get_libraries():
-    """Return list of Plex library names from Tautulli."""
-    libs = get_tautulli_libraries_cached()
+    """Return list of Plex library names."""
+    libs = get_plex_libraries_cached()
     return jsonify({"libraries": sorted(set(libs.values()))})
 
 
@@ -1119,6 +1180,10 @@ def enrich_media():
         tautulli_history = get_tautulli_history_cached()
         watch_info = lookup_tautulli(item["title"], tautulli_history)
 
+        # Plex library mapping
+        plex_lib_map = get_plex_library_map_cached()
+        lib_name = plex_lib_map.get(item["title"].lower().strip(), "")
+
         results.append({
             "id":             media_id,
             "type":           media_type,
@@ -1127,7 +1192,7 @@ def enrich_media():
             "torrent_hashes": [t["hash"] for t in torrents],
             "last_watched":   watch_info["last_watched"] if watch_info else None,
             "play_count":     watch_info["play_count"] if watch_info else 0,
-            "library_name":   watch_info.get("library_name", "") if watch_info else "",
+            "library_name":   lib_name,
         })
 
     total = time.time() - t0
@@ -1370,6 +1435,8 @@ def get_settings():
         "seerr_api_key":  MASKED if has_val("seerr_api_key",  "SEERR_API_KEY")  else "",
         "tautulli_url":     _cfg("tautulli_url",     "TAUTULLI_URL",     ""),
         "tautulli_api_key": MASKED if has_val("tautulli_api_key", "TAUTULLI_API_KEY") else "",
+        "plex_url":         _cfg("plex_url",         "PLEX_URL",         ""),
+        "plex_token":       MASKED if has_val("plex_token", "PLEX_TOKEN") else "",
         "removarr_username": _get_auth_username(),
         "removarr_password": MASKED if _get_password() else "",
         "removarr_allowed_ips": _runtime_settings.get("removarr_allowed_ips") or os.environ.get("REMOVARR_ALLOWED_IPS", ""),
@@ -1492,6 +1559,22 @@ def test_service(service):
             if ok:
                 try:
                     server_name = r.json().get("response", {}).get("data", {}).get("pms_name")
+                except Exception:
+                    pass
+            return jsonify({"ok": ok, "name": server_name, "status": r.status_code})
+
+        elif service == "plex":
+            url = val("plex_url", "PLEX_URL", "").rstrip("/")
+            token = val("plex_token", "PLEX_TOKEN")
+            if not url:
+                return jsonify({"ok": False, "error": "URL non configurée"})
+            r = requests.get(f"{url}/identity",
+                             headers={"X-Plex-Token": token, "Accept": "application/json"}, timeout=5)
+            ok = r.status_code == 200
+            server_name = None
+            if ok:
+                try:
+                    server_name = r.json().get("MediaContainer", {}).get("machineIdentifier", "OK")
                 except Exception:
                     pass
             return jsonify({"ok": ok, "name": server_name, "status": r.status_code})

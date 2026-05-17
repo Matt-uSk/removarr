@@ -4,6 +4,12 @@ All notable changes to Removarr are documented here.
 
 ---
 
+## v1.5.4 (2026-05-16)
+
+**Fixes**
+- qBittorrent 5.2.0 compatibility: login API now returns HTTP 204 instead of 200 with empty body (was causing "error 204" on all qBit operations)
+- Fix applied to main login, setup test, and settings test endpoints
+
 ## v1.5.3 (2026-03-20)
 
 **Features**

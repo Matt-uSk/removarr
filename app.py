@@ -14,7 +14,7 @@ import time
 import unicodedata
 import base64
 
-APP_VERSION = "1.5.3"
+APP_VERSION = "1.5.4"
 
 app = Flask(__name__)
 app.config["TEMPLATES_AUTO_RELOAD"] = True
@@ -390,7 +390,8 @@ def qbit_login():
         r = qbit_session.post(f"{get_qbit_url()}/api/v2/auth/login",
                               data={"username": get_qbit_username(), "password": get_qbit_password()},
                               timeout=5)
-        return r.text == "Ok."
+        # qBit < 5.2.0 returns 200 with "Ok.", qBit 5.2.0+ returns 204 with empty body
+        return r.status_code in (200, 204) and r.text.strip() != "Fails."
     except Exception as e:
         logger.error(f"qBittorrent login failed: {e}")
         return False
@@ -885,7 +886,7 @@ def setup_test_service():
             s = requests.Session()
             r = s.post(f"{url}/api/v2/auth/login",
                        data={"username": data.get("username", "admin"), "password": data.get("password", "")}, timeout=5)
-            return jsonify({"ok": r.text.strip() == "Ok."})
+            return jsonify({"ok": r.status_code in (200, 204) and r.text.strip() != "Fails."})
         elif service == "tmdb":
             key = data.get("api_key", "").strip('"').strip("'")
             r = requests.get(
@@ -1406,7 +1407,7 @@ def test_service(service):
             pwd  = val("qbit_password", "QBIT_PASSWORD", "")
             s = requests.Session()
             r = s.post(f"{url}/api/v2/auth/login", data={"username": user, "password": pwd}, timeout=5)
-            ok = r.text.strip() == "Ok."
+            ok = r.status_code in (200, 204) and r.text.strip() != "Fails."
             return jsonify({"ok": ok, "status": r.status_code})
 
         elif service == "tmdb":
